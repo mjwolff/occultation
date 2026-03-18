@@ -20,10 +20,10 @@
 6. [x] Complete ray-trace loop body (port lines 64–127 from `mars_example.pro` verbatim)
        Acceptance: loop body compiles and produces no syntax errors
 
-7. [ ] Run full loop over one orbit and verify no errors
+7. [x] Run full loop over one orbit and verify no errors
        Acceptance: all `npts` iterations complete; no `MESSAGE`/`STOP` is triggered
 
-8. [ ] Validate `tang_alt` against `mars_example.pro` at equivalent geometry (lat≈0, lon≈243.5°, alt≈400 km)
+8. [x] Validate `tang_alt` against `mars_example.pro` at equivalent geometry (lat≈0, lon≈243.5°, alt≈400 km)
        Acceptance: `tang_alt` values agree within `eps = 10 m`
 
 9. [ ] Commit `mars_occultation_orbit.pro` and `sp_calculate_subsolar_longitude.pro` to git
