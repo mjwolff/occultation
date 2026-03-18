@@ -14,7 +14,7 @@
 4. [x] Add unit conversion (`result[i].alt * 1.0d3`) and connect to `osse_latlon_to_cartesian`
        Acceptance: `sat_pos` at lat=0, lon=243.5°, alt=400 km matches the hardcoded equivalent from `mars_example.pro` within 1 km
 
-5. [ ] Implement per-step sub-solar longitude formula in loop
+5. [x] Implement per-step sub-solar longitude formula in loop
        Acceptance: `ss_lon` shifts by ~0.24° per 60-second step (consistent with `omega_mars = 7.088e-5 rad/s`)
 
 6. [ ] Complete ray-trace loop body (port lines 64–127 from `mars_example.pro` verbatim)

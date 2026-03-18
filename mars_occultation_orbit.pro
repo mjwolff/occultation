@@ -138,8 +138,21 @@ PRO mars_occultation_orbit
   PRINT, ''
 
   ; ===========================================================================
+  ; 5. SUB-SOLAR LONGITUDE SPOT CHECK
+  ; ===========================================================================
+  ; Verify ss_lon shifts by ~0.24 deg per 60-second step
+  ss_lon_t0   = sp_calculate_subsolar_longitude(0.0d0,  0.0d0, ss_lon_at_t0, mars)
+  ss_lon_t60  = sp_calculate_subsolar_longitude(60.0d0, 0.0d0, ss_lon_at_t0, mars)
+  ss_lon_tday = sp_calculate_subsolar_longitude(88642.0d0, 0.0d0, ss_lon_at_t0, mars)
+
+  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=0:      ', ss_lon_t0,    ' deg (expect 0.0)'
+  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=60s:    ', ss_lon_t60,   ' deg (expect ~-0.244)'
+  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=88642s: ', ss_lon_tday,  ' deg (expect ~0.0)'
+  PRINT, ''
+
+  ; ===========================================================================
   ; PLACEHOLDER — loop and results follow in subsequent steps
   ; ===========================================================================
-  PRINT, 'Unit conversion OK'
+  PRINT, 'Sub-solar longitude OK'
   STOP
 END
