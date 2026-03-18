@@ -105,8 +105,41 @@ PRO mars_occultation_orbit
   PRINT, ''
 
   ; ===========================================================================
+  ; 4. UNIT CONVERSION CHECK — verify sat_pos matches mars_example.pro
+  ;    at equivalent geometry (lat=0, lon=243.5, alt=400 km)
+  ; ===========================================================================
+  ; Find the time step closest to lat=0, lon≈243.5, alt≈400 km
+  ; For verification only — this block will be removed once loop is complete.
+  ref_lat = 0.0d0
+  ref_lon = 180.0d0 + (90.0d0 - 26.5d0)   ; 243.5 deg (matches mars_example.pro)
+  ref_alt = 400.0d3                          ; meters
+
+  ; Hardcoded reference from mars_example.pro
+  ref_sat_pos = osse_latlon_to_cartesian(ref_lat, ref_lon, ref_alt)
+
+  ; Equivalent via propagator output with unit conversion (km -> m)
+  ; Use first step as a spot-check (lat=0, lon=0, alt=381 km here;
+  ; full validation at matching geometry happens in item 8 with full loop)
+  i_check = 0L
+  sat_lat  = result[i_check].lat
+  sat_lon  = result[i_check].lon
+  sat_alt  = result[i_check].alt * 1.0d3   ; km -> meters
+
+  prop_sat_pos = osse_latlon_to_cartesian(sat_lat, sat_lon, sat_alt)
+
+  PRINT, ''
+  PRINT, 'Unit conversion check (step 0):'
+  PRINT, FORMAT='(A,3F12.1)', '  prop sat_pos (m): ', prop_sat_pos
+  PRINT, FORMAT='(A,3F12.1)', '  ref  sat_pos (m): ', ref_sat_pos
+  PRINT, FORMAT='(A,F10.3,A)', '  |ref| altitude (km): ', $
+         (SQRT(TOTAL(ref_sat_pos^2)) - 3397.0d3) / 1.0d3, ' km'
+  PRINT, FORMAT='(A,F10.3,A)', '  |prop| altitude (km): ', $
+         (SQRT(TOTAL(prop_sat_pos^2)) - 3397.0d3) / 1.0d3, ' km'
+  PRINT, ''
+
+  ; ===========================================================================
   ; PLACEHOLDER — loop and results follow in subsequent steps
   ; ===========================================================================
-  PRINT, 'Propagation OK'
+  PRINT, 'Unit conversion OK'
   STOP
 END

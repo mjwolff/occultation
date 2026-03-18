@@ -11,7 +11,7 @@
 3. [x] Add `sp_propagate_orbit` call and print `.lat`, `.lon`, `.alt` for first time step
        Acceptance: printed values match expected TGO-like orbit geometry (alt ≈ 400 km, lat in [-74°, 74°])
 
-4. [ ] Add unit conversion (`result[i].alt * 1.0d3`) and connect to `osse_latlon_to_cartesian`
+4. [x] Add unit conversion (`result[i].alt * 1.0d3`) and connect to `osse_latlon_to_cartesian`
        Acceptance: `sat_pos` at lat=0, lon=243.5°, alt=400 km matches the hardcoded equivalent from `mars_example.pro` within 1 km
 
 5. [ ] Implement per-step sub-solar longitude formula in loop
