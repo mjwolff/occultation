@@ -8,7 +8,7 @@
 2. [x] Create `mars_occultation_orbit.pro` with IDL path setup, orbital elements block, and sub-solar geometry block (no loop yet)
        Acceptance: file compiles clean in IDL (`RESOLVE_ROUTINE, 'mars_occultation_orbit'` exits without error)
 
-3. [ ] Add `sp_propagate_orbit` call and print `.lat`, `.lon`, `.alt` for first time step
+3. [x] Add `sp_propagate_orbit` call and print `.lat`, `.lon`, `.alt` for first time step
        Acceptance: printed values match expected TGO-like orbit geometry (alt ≈ 400 km, lat in [-74°, 74°])
 
 4. [ ] Add unit conversion (`result[i].alt * 1.0d3`) and connect to `osse_latlon_to_cartesian`

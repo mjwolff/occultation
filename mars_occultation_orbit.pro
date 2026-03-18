@@ -91,8 +91,22 @@ PRO mars_occultation_orbit
   PRINT, FORMAT='(A,F6.2,A)', 'Sub-solar longitude at t0: ', ss_lon_at_t0, ' deg'
 
   ; ===========================================================================
-  ; PLACEHOLDER — propagation, loop, and results follow in subsequent steps
+  ; 3. PROPAGATE ORBIT
   ; ===========================================================================
-  PRINT, 'Skeleton compiled OK'
+  PRINT, 'Propagating orbit...'
+  result = sp_propagate_orbit(elements, t, t0, mars)
+
+  ; Print first time step to verify geometry
+  PRINT, ''
+  PRINT, 'First time step (t=0):'
+  PRINT, FORMAT='(A,F10.4,A)', '  Latitude:  ', result[0].lat, ' deg'
+  PRINT, FORMAT='(A,F10.4,A)', '  Longitude: ', result[0].lon, ' deg'
+  PRINT, FORMAT='(A,F10.4,A)', '  Altitude:  ', result[0].alt, ' km'
+  PRINT, ''
+
+  ; ===========================================================================
+  ; PLACEHOLDER — loop and results follow in subsequent steps
+  ; ===========================================================================
+  PRINT, 'Propagation OK'
   STOP
 END
