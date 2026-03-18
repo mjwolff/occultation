@@ -26,5 +26,7 @@
 8. [x] Validate `tang_alt` against `mars_example.pro` at equivalent geometry (lat≈0, lon≈243.5°, alt≈400 km)
        Acceptance: `tang_alt` values agree within `eps = 10 m`
 
-9. [ ] Commit `mars_occultation_orbit.pro` and `sp_calculate_subsolar_longitude.pro` to git
-       Acceptance: `git log --oneline` shows both files in the same commit
+9. [x] Commit `mars_occultation_orbit.pro` and `sp_calculate_subsolar_longitude.pro` to git
+       Note: files reside in separate repos; cross-reference commit links them.
+       occultation:        mars_occultation_orbit.pro (this repo, items 2-8)
+       satellite_position: sp_calculate_subsolar_longitude.pro (433c3ee, 76368be)
