@@ -18,18 +18,22 @@
 ;
 ; OUTPUTS:
 ;   Structure 'a' containing:
-;     .time           - time array (seconds from epoch)
-;     .height         - tangent point altitude (m) at each time step
-;     .longitude      - tangent point longitude (degrees)
-;     .latitude       - tangent point latitude (degrees)
+;     .time            - time array (seconds from epoch)
+;     .height          - tangent point altitude (m) at each time step
+;     .longitude       - tangent point longitude (degrees)
+;     .latitude        - tangent point latitude (degrees)
 ;     .n_intersections - number of atmospheric layers intersected
-;     .path_info      - pointer array of path geometry structs
+;     .path_info       - pointer array of path geometry structs
 ;
 ; NOTES:
 ;   - mars_example.pro is preserved as a standalone hardcoded reference
 ;   - IDL path setup uses ROUTINE_FILEPATH (IDL 8.0+)
 ;   - ss_lon_at_t0 is a mission parameter: the Mars-fixed longitude facing
 ;     the Sun at epoch t0. Must be supplied by the user.
+;   - The occultation code uses a spherical Mars (R=3397 km); the propagator
+;     uses an oblate ellipsoid (r_eq=3396.19 km). The lat/lon/alt interface
+;     insulates the two models; the difference is within the existing
+;     spherical approximation already present in the occultation code.
 ;
 ; MODIFICATION HISTORY:
 ;   2026-03-18: Initial implementation
@@ -55,7 +59,7 @@ PRO mars_occultation_orbit
   ; ===========================================================================
   mars = sp_mars_constants()
 
-  ; TGO-like orbit: 400 km altitude, 74-degree inclination
+  ; TGO-like orbit: 400 km mean altitude, 74-degree inclination
   elements = { $
     a:     mars.r_eq + 400.0d0, $   ; semi-major axis (km)
     e:     0.005d0, $               ; eccentricity
@@ -72,8 +76,12 @@ PRO mars_occultation_orbit
   period = 2.0d0 * !DPI * SQRT(elements.a^3 / mars.mu)
   t = DINDGEN(npts) * period / DOUBLE(npts - 1)
 
+  PRINT, ''
+  PRINT, '========================================='
+  PRINT, 'MARS OCCULTATION - ORBIT-DRIVEN EXAMPLE'
+  PRINT, '========================================='
   PRINT, FORMAT='(A,F8.1,A)', 'Orbital period: ', period / 60.0d0, ' min'
-  PRINT, FORMAT='(A,I0,A)', 'Time steps: ', npts, ' (one per orbit point)'
+  PRINT, FORMAT='(A,I0,A)',   'Time steps:     ', npts, ' (one per orbit point)'
 
   ; ===========================================================================
   ; 2. SUB-SOLAR GEOMETRY  — USER CONFIGURATION
@@ -89,6 +97,7 @@ PRO mars_occultation_orbit
 
   PRINT, FORMAT='(A,F6.2,A)', 'Sub-solar latitude: ', ss_lat, ' deg'
   PRINT, FORMAT='(A,F6.2,A)', 'Sub-solar longitude at t0: ', ss_lon_at_t0, ' deg'
+  PRINT, ''
 
   ; ===========================================================================
   ; 3. PROPAGATE ORBIT
@@ -96,63 +105,116 @@ PRO mars_occultation_orbit
   PRINT, 'Propagating orbit...'
   result = sp_propagate_orbit(elements, t, t0, mars)
 
-  ; Print first time step to verify geometry
+  ; ===========================================================================
+  ; 4. OCCULTATION SETUP
+  ; ===========================================================================
+  params = osse_mars_params()
+  quiet  = 0
+  eps    = 10.0d0   ; meters — tolerance for tangent height consistency check
+
+  path_info       = PTRARR(npts, /ALLOCATE_HEAP)
+  height          = DBLARR(npts)
+  longitude       = DBLARR(npts)
+  latitude        = DBLARR(npts)
+  n_intersections = INTARR(npts)
+
+  ; ===========================================================================
+  ; 5 & 6. MAIN LOOP over orbital time steps
+  ; ===========================================================================
+  PRINT, 'Performing ray trace...'
+
+  FOR i = 0, npts - 1 DO BEGIN
+
+    ; Satellite position from propagator (alt: km -> m for occultation code)
+    sat_lat = result[i].lat
+    sat_lon = result[i].lon
+    sat_alt = result[i].alt * 1.0d3   ; km -> meters
+
+    ; Sub-solar longitude at this time step (Mars rotates east, footprint moves west)
+    ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
+
+    ; Convert to occultation Cartesian frame and get sun direction
+    sat_pos = osse_latlon_to_cartesian(sat_lat, sat_lon, sat_alt)
+    sun_dir = osse_sspt_to_sun_direction(ss_lat, ss_lon, sat_pos=sat_pos)
+
+    ; Calculate the pathlength to the tangent point
+    s_tangent    = -TOTAL(sat_pos * sun_dir)
+    tangent_point = sat_pos + s_tangent * sun_dir
+    res_tangent  = osse_cartesian_to_latlon(tangent_point)
+    PRINT, 'tangent: ', res_tangent.longitude, res_tangent.latitude, $
+           res_tangent.altitude / 1000.d0
+    height[i]    = res_tangent.altitude
+    longitude[i] = res_tangent.longitude
+    latitude[i]  = res_tangent.latitude
+
+    ; Trace the ray from spacecraft towards sun through atmospheric layers
+    osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, $
+      intersections, n_int, quiet=quiet
+    n_intersections[i] = n_int
+
+    IF ABS(tang_alt - res_tangent.altitude) GT eps THEN BEGIN
+      MESSAGE, 'tangent point height calculations differ.'
+      STOP
+    ENDIF
+
+    PRINT, FORMAT='(A,F9.4,A,I4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
+           ' km, Layers intersected: ', n_int
+
+    ; Get integration points along sightline; skip if ray misses atmosphere
+    IF n_int GT 0 THEN BEGIN
+
+      ; Sorted list of intersection points along the sightline
+      osse_construct_pathlength, intersections, s_inbound, s_outbound, $
+        params=params
+
+      ; Verify discriminants are not near-tangent (would indicate a degenerate ray)
+      idx = WHERE(intersections[*].intersects GT 0.)
+      IF idx[0] NE -1 THEN BEGIN
+        min_discriminant = MIN([intersections[idx].discriminant_inner, $
+                                intersections[idx].discriminant_outer])
+        IF min_discriminant LT 1.e4 THEN BEGIN
+          MESSAGE, 'min(discriminant) lt 1.e4'
+          STOP
+        ENDIF
+      ENDIF
+
+      s_points   = [s_inbound, s_tangent, s_outbound]
+      n_s_points = N_ELEMENTS(s_points)
+      intersection_points = FLTARR(3, n_s_points)
+
+      FOR j = 0, n_s_points - 1 DO BEGIN
+        s_position = sat_pos + s_points[j] * sun_dir
+        res = osse_cartesian_to_latlon(s_position)
+        intersection_points[*, j] = [res.longitude, res.latitude, res.altitude]
+      ENDFOR
+
+      *path_info[i] = { $
+        path_length:    s_points, $
+        path_longitude: REFORM(intersection_points[0, *]), $
+        path_latitude:  REFORM(intersection_points[1, *]), $
+        path_altitude:  REFORM(intersection_points[2, *]) $
+      }
+
+    ENDIF
+
+  ENDFOR   ; end loop over time steps
+
+  ; ===========================================================================
+  ; RESULTS
+  ; ===========================================================================
+  a = { $
+    time:            t, $
+    height:          height, $
+    longitude:       longitude, $
+    latitude:        latitude, $
+    n_intersections: n_intersections, $
+    path_info:       path_info $
+  }
+
   PRINT, ''
-  PRINT, 'First time step (t=0):'
-  PRINT, FORMAT='(A,F10.4,A)', '  Latitude:  ', result[0].lat, ' deg'
-  PRINT, FORMAT='(A,F10.4,A)', '  Longitude: ', result[0].lon, ' deg'
-  PRINT, FORMAT='(A,F10.4,A)', '  Altitude:  ', result[0].alt, ' km'
+  PRINT, '========================================='
+  PRINT, 'Orbit-driven occultation complete'
+  PRINT, '========================================='
   PRINT, ''
-
-  ; ===========================================================================
-  ; 4. UNIT CONVERSION CHECK — verify sat_pos matches mars_example.pro
-  ;    at equivalent geometry (lat=0, lon=243.5, alt=400 km)
-  ; ===========================================================================
-  ; Find the time step closest to lat=0, lon≈243.5, alt≈400 km
-  ; For verification only — this block will be removed once loop is complete.
-  ref_lat = 0.0d0
-  ref_lon = 180.0d0 + (90.0d0 - 26.5d0)   ; 243.5 deg (matches mars_example.pro)
-  ref_alt = 400.0d3                          ; meters
-
-  ; Hardcoded reference from mars_example.pro
-  ref_sat_pos = osse_latlon_to_cartesian(ref_lat, ref_lon, ref_alt)
-
-  ; Equivalent via propagator output with unit conversion (km -> m)
-  ; Use first step as a spot-check (lat=0, lon=0, alt=381 km here;
-  ; full validation at matching geometry happens in item 8 with full loop)
-  i_check = 0L
-  sat_lat  = result[i_check].lat
-  sat_lon  = result[i_check].lon
-  sat_alt  = result[i_check].alt * 1.0d3   ; km -> meters
-
-  prop_sat_pos = osse_latlon_to_cartesian(sat_lat, sat_lon, sat_alt)
-
-  PRINT, ''
-  PRINT, 'Unit conversion check (step 0):'
-  PRINT, FORMAT='(A,3F12.1)', '  prop sat_pos (m): ', prop_sat_pos
-  PRINT, FORMAT='(A,3F12.1)', '  ref  sat_pos (m): ', ref_sat_pos
-  PRINT, FORMAT='(A,F10.3,A)', '  |ref| altitude (km): ', $
-         (SQRT(TOTAL(ref_sat_pos^2)) - 3397.0d3) / 1.0d3, ' km'
-  PRINT, FORMAT='(A,F10.3,A)', '  |prop| altitude (km): ', $
-         (SQRT(TOTAL(prop_sat_pos^2)) - 3397.0d3) / 1.0d3, ' km'
-  PRINT, ''
-
-  ; ===========================================================================
-  ; 5. SUB-SOLAR LONGITUDE SPOT CHECK
-  ; ===========================================================================
-  ; Verify ss_lon shifts by ~0.24 deg per 60-second step
-  ss_lon_t0   = sp_calculate_subsolar_longitude(0.0d0,  0.0d0, ss_lon_at_t0, mars)
-  ss_lon_t60  = sp_calculate_subsolar_longitude(60.0d0, 0.0d0, ss_lon_at_t0, mars)
-  ss_lon_tday = sp_calculate_subsolar_longitude(88642.0d0, 0.0d0, ss_lon_at_t0, mars)
-
-  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=0:      ', ss_lon_t0,    ' deg (expect 0.0)'
-  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=60s:    ', ss_lon_t60,   ' deg (expect ~-0.244)'
-  PRINT, FORMAT='(A,F8.4,A)', 'ss_lon at t=88642s: ', ss_lon_tday,  ' deg (expect ~0.0)'
-  PRINT, ''
-
-  ; ===========================================================================
-  ; PLACEHOLDER — loop and results follow in subsequent steps
-  ; ===========================================================================
-  PRINT, 'Sub-solar longitude OK'
   STOP
 END

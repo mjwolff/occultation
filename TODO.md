@@ -17,7 +17,7 @@
 5. [x] Implement per-step sub-solar longitude formula in loop
        Acceptance: `ss_lon` shifts by ~0.24° per 60-second step (consistent with `omega_mars = 7.088e-5 rad/s`)
 
-6. [ ] Complete ray-trace loop body (port lines 64–127 from `mars_example.pro` verbatim)
+6. [x] Complete ray-trace loop body (port lines 64–127 from `mars_example.pro` verbatim)
        Acceptance: loop body compiles and produces no syntax errors
 
 7. [ ] Run full loop over one orbit and verify no errors
