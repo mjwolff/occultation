@@ -2,10 +2,10 @@
 
 ## Status key: [ ] not started  [~] in progress  [x] done
 
-1. [ ] Create `sp_calculate_subsolar_longitude.pro` in `../satellite_position/src/`
+1. [x] Create `sp_calculate_subsolar_longitude.pro` in `../satellite_position/src/`
        Acceptance: function returns expected longitude shift for a known Mars rotation interval (e.g. t=88642s → full 360° rotation)
 
-2. [ ] Create `mars_occultation_orbit.pro` with IDL path setup, orbital elements block, and sub-solar geometry block (no loop yet)
+2. [x] Create `mars_occultation_orbit.pro` with IDL path setup, orbital elements block, and sub-solar geometry block (no loop yet)
        Acceptance: file compiles clean in IDL (`RESOLVE_ROUTINE, 'mars_occultation_orbit'` exits without error)
 
 3. [ ] Add `sp_propagate_orbit` call and print `.lat`, `.lon`, `.alt` for first time step
