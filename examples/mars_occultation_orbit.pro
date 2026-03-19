@@ -47,9 +47,10 @@ PRO mars_occultation_orbit
   ; ===========================================================================
   ; Both codebases are sibling directories under orbit/.
   ; ROUTINE_FILEPATH locates this file regardless of working directory.
-  sp_src = FILE_DIRNAME(ROUTINE_FILEPATH('mars_occultation_orbit')) + $
-           '/../satellite_position/src'
-  !PATH = EXPAND_PATH(sp_src) + ':' + !PATH
+  this_dir = FILE_DIRNAME(ROUTINE_FILEPATH('mars_occultation_orbit'))
+  sp_src   = this_dir + '/../../satellite_position/src'
+  occ_src  = this_dir + '/../src'
+  !PATH = EXPAND_PATH(sp_src) + ':' + EXPAND_PATH(occ_src) + ':' + !PATH
 
   ; Compile occultation coordinate utilities
   osse_mars_coordinates

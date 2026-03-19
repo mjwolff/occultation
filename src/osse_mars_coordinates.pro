@@ -146,6 +146,12 @@ function osse_cartesian_to_latlon, position
   ; Radial distance
   r = sqrt(x ^ 2 + y ^ 2 + z ^ 2)
 
+  ; Guard: position at or within 1 m of Mars center (e.g. tangent point on Sun-Mars line)
+  if r lt 1.0d then begin
+    result = {latitude: 0.0d, longitude: 0.0d, altitude: -params.r_mars}
+    return, result
+  endif
+
   ; Altitude
   altitude = r - params.r_mars
 
