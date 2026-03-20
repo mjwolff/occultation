@@ -1,13 +1,14 @@
 ; ==============================================================================
 ; FIND 3D SHELL INTERSECTION WITH ENTRY/EXIT POINTS
-; ==============================================================================
 ;
+; MODIFICATION HISTORY:
 ; 2026/02/08 (mjw):  set r_inner, r_outer, altitude in INTERSECTION structure
 ;                        which was not previously done correctly
-;
+; 2026/03/20 (mjw):  add VERBOSE keyword; screen output only when set
+; ==============================================================================
 
 pro osse_find_shell_intersection_3d, sat_pos, sun_dir, r_inner, r_outer, $
-  intersection
+  intersection, verbose=verbose
   compile_opt idl2, hidden
 
   intersection = osse_create_shell_intersection()
@@ -66,14 +67,14 @@ pro osse_find_shell_intersection_3d, sat_pos, sun_dir, r_inner, r_outer, $
       intersection.s_exit = s2_outer
       intersection.path_length = s2_outer - s1_outer
       intersection.intersects = 1b
-      print,'case 1'
+      if keyword_set(verbose) then print,'case 1'
     endif else if s2_outer gt 0.0d then begin
       ; Satellite inside outer sphere
       intersection.s_entry = 0.0d
       intersection.s_exit = s2_outer
       intersection.path_length = s2_outer
       intersection.intersects = 1b
-      print,'case 2'
+      if keyword_set(verbose) then print,'case 2'
     endif
   endif else if hit_outer and hit_inner then begin
     ; Ray enters and exits shell
@@ -92,14 +93,14 @@ pro osse_find_shell_intersection_3d, sat_pos, sun_dir, r_inner, r_outer, $
         intersection.s_exit = s2_outer
         intersection.path_length = s2_outer - s2_inner
         intersection.intersects = 1b
-        print,'case 4.c'
+        if keyword_set(verbose) then print,'case 4.c'
       endif else begin
         ; Entire outer segment
         intersection.s_entry = (s1_outer > 0.0d)
         intersection.s_exit = s2_outer
         intersection.path_length = s2_outer - (s1_outer > 0.0d)
         intersection.intersects = 1b
-        print,'case 5'
+        if keyword_set(verbose) then print,'case 5'
       endelse
     endif
   endif

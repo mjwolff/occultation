@@ -7,11 +7,13 @@
 ;                       (was done orginally incorrectly here)
 ; 2026/02/11 (mjw):  remote r_sat, which wasn't used.
 ; 2026/02/12 (mjw):  trap case of ray hitting planet
+; 2026/03/20 (mjw):  replace QUIET keyword with VERBOSE for consistency;
+;                        pass VERBOSE through to osse_find_shell_intersection_3d
 ;
 
 pro osse_trace_ray_occultation_3d, sat_pos, sun_dir, tangent_altitude, $
   intersections, n_intersect, $
-  params = params, quiet = quiet
+  params=params, verbose=verbose
   compile_opt idl2
 
   ; Get parameters
@@ -35,11 +37,11 @@ pro osse_trace_ray_occultation_3d, sat_pos, sun_dir, tangent_altitude, $
 
   ; Check if ray intersects atmosphere
   if impact_param gt params.r_mars + params.h_atm then begin
-    if ~keyword_set(quiet) then print, 'Ray does not intersect atmosphere (> h_atm)'
+    if keyword_set(verbose) then print, 'Ray does not intersect atmosphere (> h_atm)'
     n_intersect = 0
     RETURN
   endif else if impact_param lt params.r_mars then begin
-    if ~keyword_set(quiet) then print, 'Ray intersects planet'
+    if keyword_set(verbose) then print, 'Ray intersects planet'
     n_intersect = 0
     RETURN
   endif
@@ -56,7 +58,7 @@ pro osse_trace_ray_occultation_3d, sat_pos, sun_dir, tangent_altitude, $
     ; Calculate intersection points and path length
     osse_find_shell_intersection_3d, sat_pos, sun_dir_norm, $
       r_layer_inner, r_layer_outer, $
-      intersection_temp
+      intersection_temp, verbose=verbose
 
     ; Copy result to array
     intersections[i] = intersection_temp
@@ -72,7 +74,7 @@ pro osse_trace_ray_occultation_3d, sat_pos, sun_dir, tangent_altitude, $
     endif
   endfor
 
-  if ~keyword_set(quiet) then begin
+  if keyword_set(verbose) then begin
     print, format = '("Tangent altitude: ", F10.2, " km")', $
       tangent_altitude / 1000.0d
     print, format = '("Ray intersects ", I4, " atmospheric layers")', $

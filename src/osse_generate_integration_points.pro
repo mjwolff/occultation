@@ -1,8 +1,11 @@
 ; ===============================================================================
 ; GENERATE INTEGRATION POINTS ALONG RAY PATH
+;
+; MODIFICATION HISTORY:
+; 2026/03/20 (mjw): Add VERBOSE keyword; screen output only when set
 ; ===============================================================================
 pro osse_generate_integration_points, sat_pos, sun_dir, intersections, $
-  integration_points, n_points, ds_target, params = params
+  integration_points, n_points, ds_target, params=params, verbose=verbose
   compile_opt idl2
 
   if ~keyword_set(params) then params = osse_mars_params()
@@ -33,7 +36,7 @@ pro osse_generate_integration_points, sat_pos, sun_dir, intersections, $
       ; Generate points
       for j = 0l, n_steps do begin
         if n_points ge n_points_total then begin
-          print, 'Warning: Maximum integration points reached'
+          if keyword_set(verbose) then print, 'Warning: Maximum integration points reached'
           RETURN
         endif
 
