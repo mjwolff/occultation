@@ -23,8 +23,6 @@ pro mars_example
 
    quiet = 0
    eps = 10. ; precision for tangent height comparison (m)
-   ; Compile coordinate routines
-   osse_mars_coordinates
 
    ; Example: Occultation observed from satellite at specific lat/lon
    print, 'Example: Ray tracing with lat/lon inputs'

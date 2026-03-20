@@ -52,8 +52,6 @@ PRO mars_occultation_orbit
   occ_src  = this_dir + '/../src'
   !PATH = EXPAND_PATH(sp_src) + ':' + EXPAND_PATH(occ_src) + ':' + !PATH
 
-  ; Compile occultation coordinate utilities
-  osse_mars_coordinates
 
   ; ===========================================================================
   ; 1. ORBITAL ELEMENTS  — USER CONFIGURATION
