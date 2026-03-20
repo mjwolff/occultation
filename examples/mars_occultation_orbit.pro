@@ -10,6 +10,13 @@
 ;
 ; USAGE:
 ;   IDL> mars_occultation_orbit
+;   IDL> mars_occultation_orbit, /verbose
+;
+; KEYWORDS:
+;   VERBOSE - if set, enable diagnostic output from the ray-tracing
+;             routines (osse_trace_ray_occultation_3d,
+;             osse_find_shell_intersection_3d,
+;             osse_generate_integration_points)
 ;
 ; INPUTS (configured in the USER CONFIGURATION section below):
 ;   Orbital elements: a, e, i, raan, omega, M0
@@ -37,21 +44,21 @@
 ;
 ; MODIFICATION HISTORY:
 ;   2026-03-18: Initial implementation
+;   2026-03-20: Add VERBOSE keyword; pass through to ray-trace routines
 ;-
 
-PRO mars_occultation_orbit
-  COMPILE_OPT IDL2
+pro mars_occultation_orbit, verbose = verbose
+  compile_opt idl2
 
   ; ===========================================================================
   ; 0. IDL PATH SETUP
   ; ===========================================================================
   ; Both codebases are sibling directories under orbit/.
   ; ROUTINE_FILEPATH locates this file regardless of working directory.
-  this_dir = FILE_DIRNAME(ROUTINE_FILEPATH('mars_occultation_orbit'))
-  sp_src   = this_dir + '/../../satellite_position/src'
-  occ_src  = this_dir + '/../src'
-  !PATH = EXPAND_PATH(sp_src) + ':' + EXPAND_PATH(occ_src) + ':' + !PATH
-
+  this_dir = file_dirname(routine_filepath('mars_occultation_orbit'))
+  sp_src = this_dir + '/../../satellite_position/src'
+  occ_src = this_dir + '/../src'
+  !path = expand_path(sp_src) + ':' + expand_path(occ_src) + ':' + !path
 
   ; ===========================================================================
   ; 1. ORBITAL ELEMENTS  — USER CONFIGURATION
@@ -60,160 +67,156 @@ PRO mars_occultation_orbit
 
   ; TGO-like orbit: 400 km mean altitude, 74-degree inclination
   elements = { $
-    a:     mars.r_eq + 400.0d0, $   ; semi-major axis (km)
-    e:     0.005d0, $               ; eccentricity
-    i:     74.0d0 * !DTOR, $        ; inclination (radians)
-    raan:  0.0d0, $                 ; right ascension of ascending node (rad)
-    omega: 0.0d0, $                 ; argument of periapsis (radians)
-    M0:    0.0d0 $                  ; mean anomaly at epoch (radians)
-  }
+    a: mars.r_eq + 400.0d0, $ ; semi-major axis (km)
+    e: 0.005d0, $ ; eccentricity
+    i: 74.0d0 * !dtor, $ ; inclination (radians)
+    raan: 0.0d0, $ ; right ascension of ascending node (rad)
+    omega: 0.0d0, $ ; argument of periapsis (radians)
+    m0: 0.0d0 $ ; mean anomaly at epoch (radians)
+    }
 
-  t0   = 0.0d0   ; epoch (seconds)
-  npts = 45L     ; number of time steps
+  t0 = 0.0d0 ; epoch (seconds)
+  npts = 45l ; number of time steps
 
   ; One full orbital period
-  period = 2.0d0 * !DPI * SQRT(elements.a^3 / mars.mu)
-  t = DINDGEN(npts) * period / DOUBLE(npts - 1)
+  period = 2.0d0 * !dpi * sqrt(elements.a ^ 3 / mars.mu)
+  t = dindgen(npts) * period / double(npts - 1)
 
-  PRINT, ''
-  PRINT, '========================================='
-  PRINT, 'MARS OCCULTATION - ORBIT-DRIVEN EXAMPLE'
-  PRINT, '========================================='
-  PRINT, FORMAT='(A,F8.1,A)', 'Orbital period: ', period / 60.0d0, ' min'
-  PRINT, FORMAT='(A,I0,A)',   'Time steps:     ', npts, ' (one per orbit point)'
+  print, ''
+  print, '========================================='
+  print, 'MARS OCCULTATION - ORBIT-DRIVEN EXAMPLE'
+  print, '========================================='
+  print, format = '(A,F8.1,A)', 'Orbital period: ', period / 60.0d0, ' min'
+  print, format = '(A,I0,A)', 'Time steps:     ', npts, ' (one per orbit point)'
 
   ; ===========================================================================
   ; 2. SUB-SOLAR GEOMETRY  — USER CONFIGURATION
   ; ===========================================================================
   ; Sub-solar latitude from areocentric solar longitude L_s
-  Ls     = 90.0d0    ; northern summer solstice (degrees)
-  ss_lat = sp_calculate_subsolar_latitude(Ls, /DEGREES)
+  Ls = 90.0d0 ; northern summer solstice (degrees)
+  ss_lat = sp_calculate_subsolar_latitude(Ls, /degrees)
 
   ; Sub-solar longitude at epoch t0.
   ; Physical meaning: which Mars-fixed longitude faces the Sun when t = t0.
   ; This is a mission/simulation parameter — set to match your scenario.
-  ss_lon_at_t0 = 0.0d0   ; degrees
+  ss_lon_at_t0 = 0.0d0 ; degrees
 
-  PRINT, FORMAT='(A,F6.2,A)', 'Sub-solar latitude: ', ss_lat, ' deg'
-  PRINT, FORMAT='(A,F6.2,A)', 'Sub-solar longitude at t0: ', ss_lon_at_t0, ' deg'
-  PRINT, ''
+  print, format = '(A,F6.2,A)', 'Sub-solar latitude: ', ss_lat, ' deg'
+  print, format = '(A,F6.2,A)', 'Sub-solar longitude at t0: ', ss_lon_at_t0, ' deg'
+  print, ''
 
   ; ===========================================================================
   ; 3. PROPAGATE ORBIT
   ; ===========================================================================
-  PRINT, 'Propagating orbit...'
+  print, 'Propagating orbit...'
   result = sp_propagate_orbit(elements, t, t0, mars)
 
   ; ===========================================================================
   ; 4. OCCULTATION SETUP
   ; ===========================================================================
   params = osse_mars_params()
-  quiet  = 0
-  eps    = 10.0d0   ; meters — tolerance for tangent height consistency check
+  quiet = 0
+  eps = 10.0d0 ; meters — tolerance for tangent height consistency check
 
-  path_info       = PTRARR(npts, /ALLOCATE_HEAP)
-  height          = DBLARR(npts)
-  longitude       = DBLARR(npts)
-  latitude        = DBLARR(npts)
-  n_intersections = INTARR(npts)
+  path_info = ptrarr(npts, /allocate_heap)
+  height = dblarr(npts)
+  longitude = dblarr(npts)
+  latitude = dblarr(npts)
+  n_intersections = intarr(npts)
 
   ; ===========================================================================
   ; 5 & 6. MAIN LOOP over orbital time steps
   ; ===========================================================================
-  PRINT, 'Performing ray trace...'
+  print, 'Performing ray trace...'
 
-  FOR i = 0, npts - 1 DO BEGIN
-
+  for i = 0, npts - 1 do begin
     ; Satellite position from propagator (alt: km -> m for occultation code)
     sat_lat = result[i].lat
     sat_lon = result[i].lon
-    sat_alt = result[i].alt * 1.0d3   ; km -> meters
+    sat_alt = result[i].alt * 1.0d3 ; km -> meters
 
     ; Sub-solar longitude at this time step (Mars rotates east, footprint moves west)
     ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
 
     ; Convert to occultation Cartesian frame and get sun direction
     sat_pos = osse_latlon_to_cartesian(sat_lat, sat_lon, sat_alt)
-    sun_dir = osse_sspt_to_sun_direction(ss_lat, ss_lon, sat_pos=sat_pos)
+    sun_dir = osse_sspt_to_sun_direction(ss_lat, ss_lon, sat_pos = sat_pos)
 
     ; Calculate the pathlength to the tangent point
-    s_tangent    = -TOTAL(sat_pos * sun_dir)
+    s_tangent = -total(sat_pos * sun_dir)
     tangent_point = sat_pos + s_tangent * sun_dir
-    res_tangent  = osse_cartesian_to_latlon(tangent_point)
-    PRINT, 'tangent: ', res_tangent.longitude, res_tangent.latitude, $
-           res_tangent.altitude / 1000.d0
-    height[i]    = res_tangent.altitude
+    res_tangent = osse_cartesian_to_latlon(tangent_point)
+    print, 'tangent: ', res_tangent.longitude, res_tangent.latitude, $
+      res_tangent.altitude / 1000.d0
+    height[i] = res_tangent.altitude
     longitude[i] = res_tangent.longitude
-    latitude[i]  = res_tangent.latitude
+    latitude[i] = res_tangent.latitude
 
     ; Trace the ray from spacecraft towards sun through atmospheric layers
     osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, $
-      intersections, n_int, quiet=quiet
+      intersections, n_int, verbose = verbose
     n_intersections[i] = n_int
 
-    IF ABS(tang_alt - res_tangent.altitude) GT eps THEN BEGIN
-      MESSAGE, 'tangent point height calculations differ.'
-      STOP
-    ENDIF
+    if abs(tang_alt - res_tangent.altitude) gt eps then begin
+      message, 'tangent point height calculations differ.'
+      stop
+    endif
 
-    PRINT, FORMAT='(A,F9.4,A,I4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
-           ' km, Layers intersected: ', n_int
+    print, format = '(A,F9.4,A,I4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
+      ' km, Layers intersected: ', n_int
 
     ; Get integration points along sightline; skip if ray misses atmosphere
-    IF n_int GT 0 THEN BEGIN
-
+    if n_int gt 0 then begin
       ; Sorted list of intersection points along the sightline
       osse_construct_pathlength, intersections, s_inbound, s_outbound, $
-        params=params
+        params = params
 
       ; Verify discriminants are not near-tangent (would indicate a degenerate ray)
-      idx = WHERE(intersections[*].intersects GT 0.)
-      IF idx[0] NE -1 THEN BEGIN
-        min_discriminant = MIN([intersections[idx].discriminant_inner, $
-                                intersections[idx].discriminant_outer])
-        IF min_discriminant LT 1.e4 THEN BEGIN
-          MESSAGE, 'min(discriminant) lt 1.e4'
-          STOP
-        ENDIF
-      ENDIF
+      idx = where(intersections[*].intersects gt 0.)
+      if idx[0] ne -1 then begin
+        min_discriminant = min([intersections[idx].discriminant_inner, $
+          intersections[idx].discriminant_outer])
+        if min_discriminant lt 1.e4 then begin
+          message, 'min(discriminant) lt 1.e4'
+          stop
+        endif
+      endif
 
-      s_points   = [s_inbound, s_tangent, s_outbound]
-      n_s_points = N_ELEMENTS(s_points)
-      intersection_points = FLTARR(3, n_s_points)
+      s_points = [s_inbound, s_tangent, s_outbound]
+      n_s_points = n_elements(s_points)
+      intersection_points = fltarr(3, n_s_points)
 
-      FOR j = 0, n_s_points - 1 DO BEGIN
+      for j = 0, n_s_points - 1 do begin
         s_position = sat_pos + s_points[j] * sun_dir
         res = osse_cartesian_to_latlon(s_position)
         intersection_points[*, j] = [res.longitude, res.latitude, res.altitude]
-      ENDFOR
+      endfor
 
       *path_info[i] = { $
-        path_length:    s_points, $
-        path_longitude: REFORM(intersection_points[0, *]), $
-        path_latitude:  REFORM(intersection_points[1, *]), $
-        path_altitude:  REFORM(intersection_points[2, *]) $
-      }
-
-    ENDIF
-
-  ENDFOR   ; end loop over time steps
+        path_length: s_points, $
+        path_longitude: reform(intersection_points[0, *]), $
+        path_latitude: reform(intersection_points[1, *]), $
+        path_altitude: reform(intersection_points[2, *]) $
+        }
+    endif
+  endfor ; end loop over time steps
 
   ; ===========================================================================
   ; RESULTS
   ; ===========================================================================
   a = { $
-    time:            t, $
-    height:          height, $
-    longitude:       longitude, $
-    latitude:        latitude, $
+    time: t, $
+    height: height, $
+    longitude: longitude, $
+    latitude: latitude, $
     n_intersections: n_intersections, $
-    path_info:       path_info $
-  }
+    path_info: path_info $
+    }
 
-  PRINT, ''
-  PRINT, '========================================='
-  PRINT, 'Orbit-driven occultation complete'
-  PRINT, '========================================='
-  PRINT, ''
-  STOP
-END
+  print, ''
+  print, '========================================='
+  print, 'Orbit-driven occultation complete'
+  print, '========================================='
+  print, ''
+  stop
+end
