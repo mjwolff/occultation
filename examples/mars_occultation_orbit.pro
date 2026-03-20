@@ -76,7 +76,7 @@ pro mars_occultation_orbit, verbose = verbose
     }
 
   t0 = 0.0d0 ; epoch (seconds)
-  npts = 45l ; number of time steps
+  npts = 1000l ; number of time steps
 
   ; One full orbital period
   period = 2.0d0 * !dpi * sqrt(elements.a ^ 3 / mars.mu)
@@ -146,8 +146,9 @@ pro mars_occultation_orbit, verbose = verbose
     s_tangent = -total(sat_pos * sun_dir)
     tangent_point = sat_pos + s_tangent * sun_dir
     res_tangent = osse_cartesian_to_latlon(tangent_point)
-    print, 'tangent: ', res_tangent.longitude, res_tangent.latitude, $
-      res_tangent.altitude / 1000.d0
+    print, i, t[i], res_tangent.longitude, res_tangent.latitude, $
+      res_tangent.altitude / 1000.d0, ss_lon, ss_lat, $
+      format = '(i6,1x,e15.8,1x,2(f7.2,1x),f8.1,1x,2(f7.2,1x))'
     height[i] = res_tangent.altitude
     longitude[i] = res_tangent.longitude
     latitude[i] = res_tangent.latitude
@@ -162,8 +163,8 @@ pro mars_occultation_orbit, verbose = verbose
       stop
     endif
 
-    print, format = '(A,F9.4,A,I4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
-      ' km, Layers intersected: ', n_int
+    ; print, format = '(A,F9.4,A,I4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
+    ; ' km, Layers intersected: ',n_int
 
     ; Get integration points along sightline; skip if ray misses atmosphere
     if n_int gt 0 then begin
