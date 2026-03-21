@@ -39,7 +39,8 @@ pro osse_run_all_tests
     'test_osse_find_shell_intersection_3d', $
     'test_osse_trace_ray_occultation_3d', $
     'test_osse_construct_pathlength', $
-    'test_osse_generate_integration_points' $
+    'test_osse_generate_integration_points', $
+    'test_osse_local_true_solar_time' $
   ]
   n_tests = n_elements(tests)
   status = strarr(n_tests)
