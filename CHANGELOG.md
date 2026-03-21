@@ -123,3 +123,59 @@ Files changed:
   - src/osse_sspt_to_sun_direction.pro
   - src/osse_sza.pro
   - tests/test_coordinate_conversions.pro
+
+### ecbe292 — 2026-03-20 12:49:06 +0100
+Reorder CHANGELOG entries to ascending date order and fix post-commit hook
+
+Files changed:
+  - CHANGELOG.md
+
+### abae3ee — 2026-03-20 14:34:37 +0100
+Add VERBOSE keyword to src routines; suppress screen output by default
+
+Files changed:
+  - src/osse_find_shell_intersection_3d.pro
+  - src/osse_generate_integration_points.pro
+  - src/osse_trace_ray_occultation_3d.pro
+
+### 546d798 — 2026-03-20 14:41:45 +0100
+Document VERBOSE keyword in mars_occultation_orbit header
+
+Files changed:
+  - examples/mars_occultation_orbit.pro
+
+### e6b5d71 — 2026-03-20 16:21:01 +0100
+small changes to mars_occultation_orbit test case
+
+Files changed:
+  - examples/mars_occultation_orbit.pro
+
+### 6ef7b64 — 2026-03-21 12:51:43 +0100
+Add per-routine unit tests for all osse_ src routines
+
+Files changed:
+  - docs/TODO.md
+  - tests/run_all_tests.pro
+  - tests/test_coordinate_conversions.pro
+  - tests/test_osse_cartesian_to_latlon.pro
+  - tests/test_osse_construct_pathlength.pro
+  - tests/test_osse_find_shell_intersection_3d.pro
+  - tests/test_osse_generate_integration_points.pro
+  - tests/test_osse_latlon_to_cartesian.pro
+  - tests/test_osse_sspt_to_sun_direction.pro
+  - tests/test_osse_sza.pro
+  - tests/test_osse_trace_ray_occultation_3d.pro
+
+### b7c4bae — 2026-03-21 12:59:22 +0100
+Add osse_test_install and rename run_all_tests to osse_run_all_tests
+
+Files changed:
+  - osse_test_install.pro
+  - tests/osse_run_all_tests.pro
+  - tests/run_all_tests.pro
+
+### 33ec4fb — 2026-03-21 13:07:02 +0100
+Add self-contained path setup to osse_run_all_tests
+
+Files changed:
+  - tests/osse_run_all_tests.pro
