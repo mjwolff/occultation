@@ -179,3 +179,9 @@ Add self-contained path setup to osse_run_all_tests
 
 Files changed:
   - tests/osse_run_all_tests.pro
+
+### c2cc935 — 2026-03-21 13:09:25 +0100
+Update CHANGELOG
+
+Files changed:
+  - CHANGELOG.md
