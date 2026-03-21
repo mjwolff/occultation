@@ -71,12 +71,22 @@ Standalone hardcoded driver. Sets a fixed sub-solar point and steps a satellite 
 **`mars_occultation_orbit`**
 Orbit-driven driver. Replaces the hardcoded longitude sweep with Keplerian orbital propagation from the sibling `satellite_position` library (`sp_propagate_orbit`, `sp_mars_constants`, `sp_calculate_subsolar_latitude/longitude`). Otherwise follows the same ray-trace and path-construction logic as `mars_example`. Produces the same output structure `a`.
 
+**`mars_occultation_survey`**
+Multi-orbit survey that propagates the orbit, computes the tangent altitude at every time step, and identifies occultation events. Two event types are detected:
+
+| Type | Definition | tang_alt trend |
+|---|---|---|
+| **INGRESS** | Starts when tang_alt crosses `altitude_max` (descending); ends when tang_alt crosses 0 km (descending) | Decreasing |
+| **EGRESS** | Starts when tang_alt crosses 0 km (ascending); ends when tang_alt crosses `altitude_max` (ascending) | Increasing |
+
+A complete solar occultation consists of one INGRESS followed by one EGRESS, separated by a sub-zero gap where the ray passes through the planet. Only event pairs where both halves fall entirely within the simulated interval are reported. Returns a `survey` structure containing the full `tang_alt` time series and an `events` array with one record per half-event (type, start/end times, duration, deepest-point latitude and longitude).
+
 ---
 
 ## Calling Structure
 
 ```
-mars_example  /  mars_occultation_orbit
+mars_example  /  mars_occultation_orbit  /  mars_occultation_survey
 │
 ├── osse_mars_params()                       [parameters]
 ├── osse_mars_coordinates                    [compile / init]
