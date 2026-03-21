@@ -19,12 +19,12 @@ pro run_one_test, name, passed
 end
 
 ; ===============================================================================
-; PRO: run_all_tests
+; PRO: osse_run_all_tests
 ;
 ; Driver routine — runs all osse_ unit tests in sequence and prints a summary
 ; results table.
 ; ===============================================================================
-pro run_all_tests
+pro osse_run_all_tests
   compile_opt idl2
 
   tests = [ $
