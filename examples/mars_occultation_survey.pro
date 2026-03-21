@@ -40,11 +40,14 @@
 ;   ALTITUDE_MAX - upper tangent altitude boundary in meters
 ;                  (default: params.h_atm = 100 km).
 ;                  Events are bounded by crossings of this level and 0 km.
+;   LSUBS        - areocentric solar longitude in degrees (default: 90.0,
+;                  northern summer solstice). Controls the sub-solar
+;                  latitude via sp_calculate_subsolar_latitude.
 ;   VERBOSE      - if set, print tangent altitude at every time step
 ;
 ; INPUTS (configured in the USER CONFIGURATION sections below):
 ;   Orbital elements: a, e, i, raan, omega, M0
-;   Solar geometry:   Ls (areocentric solar longitude), ss_lon_at_t0
+;   Solar geometry:   LsubS (keyword, default 90 deg), ss_lon_at_t0
 ;
 ; OUTPUTS:
 ;   Structure 'survey' containing:
@@ -88,7 +91,7 @@
 ;-
 
 pro mars_occultation_survey, norbits = norbits, dt = dt, $
-  altitude_max = altitude_max, verbose = verbose
+  altitude_max = altitude_max, LsubS = LsubS, verbose = verbose
   compile_opt idl2
 
   ; ===========================================================================
@@ -128,8 +131,8 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   ; ===========================================================================
   ; 3. SUB-SOLAR GEOMETRY  — USER CONFIGURATION
   ; ===========================================================================
-  Ls = 90.0d0 ; areocentric solar longitude (deg); 90 = N summer solstice
-  ss_lat = sp_calculate_subsolar_latitude(Ls, /degrees)
+  if n_elements(LsubS) eq 0 then LsubS = 90.0d0  ; default: northern summer solstice
+  ss_lat       = sp_calculate_subsolar_latitude(LsubS, /degrees)
   ss_lon_at_t0 = 0.0d0 ; sub-solar longitude at epoch t0 (degrees)
 
   ; ===========================================================================
