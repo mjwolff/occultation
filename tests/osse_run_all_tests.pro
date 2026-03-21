@@ -27,6 +27,10 @@ end
 pro osse_run_all_tests
   compile_opt idl2
 
+  ; Path setup — works regardless of working directory
+  this_dir = file_dirname(routine_filepath('osse_run_all_tests'))
+  !path = expand_path(this_dir) + ':' + expand_path(this_dir + '/../src') + ':' + !path
+
   tests = [ $
     'test_osse_latlon_to_cartesian', $
     'test_osse_cartesian_to_latlon', $
