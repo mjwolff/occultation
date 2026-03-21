@@ -95,7 +95,7 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   ; 0. IDL PATH SETUP
   ; ===========================================================================
   this_dir = file_dirname(routine_filepath('mars_occultation_survey'))
-  sp_src  = this_dir + '/../../satellite_position/src'
+  sp_src = this_dir + '/../../satellite_position/src'
   occ_src = this_dir + '/../src'
   !path = expand_path(sp_src) + ':' + expand_path(occ_src) + ':' + !path
 
@@ -106,12 +106,12 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
 
   ; TGO-like orbit: 400 km mean altitude, 74-degree inclination
   elements = { $
-    a:     mars.r_eq + 400.0d0, $ ; semi-major axis (km)
-    e:     0.005d0, $              ; eccentricity
-    i:     74.0d0 * !dtor, $       ; inclination (radians)
-    raan:  0.0d0, $                ; right ascension of ascending node (rad)
-    omega: 0.0d0, $                ; argument of periapsis (radians)
-    m0:    0.0d0 $                 ; mean anomaly at epoch (radians)
+    a: mars.r_eq + 400.0d0, $ ; semi-major axis (km)
+    e: 0.005d0, $ ; eccentricity
+    i: 74.0d0 * !dtor, $ ; inclination (radians)
+    raan: 0.0d0, $ ; right ascension of ascending node (rad)
+    omega: 0.0d0, $ ; argument of periapsis (radians)
+    m0: 0.0d0 $ ; mean anomaly at epoch (radians)
     }
 
   t0 = 0.0d0 ; epoch (seconds)
@@ -123,14 +123,14 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   period = 2.0d0 * !dpi * sqrt(elements.a ^ 3 / mars.mu)
   if n_elements(dt) eq 0 then dt = period / 1000.0d0
   npts = long(norbits * period / dt) + 1l
-  t    = dindgen(npts) * dt
+  t = dindgen(npts) * dt
 
   ; ===========================================================================
   ; 3. SUB-SOLAR GEOMETRY  — USER CONFIGURATION
   ; ===========================================================================
-  Ls           = 90.0d0  ; areocentric solar longitude (deg); 90 = N summer solstice
-  ss_lat       = sp_calculate_subsolar_latitude(Ls, /degrees)
-  ss_lon_at_t0 = 0.0d0   ; sub-solar longitude at epoch t0 (degrees)
+  Ls = 90.0d0 ; areocentric solar longitude (deg); 90 = N summer solstice
+  ss_lat = sp_calculate_subsolar_latitude(Ls, /degrees)
+  ss_lon_at_t0 = 0.0d0 ; sub-solar longitude at epoch t0 (degrees)
 
   ; ===========================================================================
   ; 4. OCCULTATION SETUP
@@ -146,9 +146,9 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   print, 'MARS OCCULTATION SURVEY'
   print, '================================================='
   print, format = '(A,F8.2,A)', 'Orbital period:       ', period / 60.0d0, ' min'
-  print, format = '(A,I0)',     'Orbits simulated:     ', norbits
+  print, format = '(A,I0)', 'Orbits simulated:     ', norbits
   print, format = '(A,F6.1,A)', 'Time step:            ', dt, ' s'
-  print, format = '(A,I0)',     'Total time steps:     ', npts
+  print, format = '(A,I0)', 'Total time steps:     ', npts
   print, format = '(A,F6.2,A)', 'Sub-solar latitude:   ', ss_lat, ' deg'
   print, format = '(A,F6.2,A)', 'Altitude max:         ', altitude_max / 1000.d0, ' km'
   print, ''
@@ -165,46 +165,46 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   tang_alt = dblarr(npts)
   tang_lat = dblarr(npts)
   tang_lon = dblarr(npts)
-  n_int    = lonarr(npts)
+  n_int = lonarr(npts)
 
   print, 'Computing tangent altitudes...'
 
   for i = 0l, npts - 1l do begin
-    sat_alt = orb[i].alt * 1.0d3  ; km -> m
+    sat_alt = orb[i].alt * 1.0d3 ; km -> m
     sat_pos = osse_latlon_to_cartesian(orb[i].lat, orb[i].lon, sat_alt)
 
-    ss_lon  = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
+    ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
     sun_dir = osse_sspt_to_sun_direction(ss_lat, ss_lon, sat_position = sat_pos)
 
     osse_trace_ray_occultation_3d, sat_pos, sun_dir, ta, isects, ni, params = params
 
     tang_alt[i] = ta
-    n_int[i]    = ni
+    n_int[i] = ni
 
     ; Tangent point position
     s_tp = -total(sat_pos * sun_dir)
-    tp   = osse_cartesian_to_latlon(sat_pos + s_tp * sun_dir)
+    tp = osse_cartesian_to_latlon(sat_pos + s_tp * sun_dir)
     tang_lat[i] = tp.latitude
     tang_lon[i] = tp.longitude
 
     if keyword_set(verbose) then $
       print, format = '(I6,A,E14.6,A,F8.2,A,F7.2,A,F7.2)', $
-        i, '  t=', t[i], '  tang_alt=', ta / 1000.d0, ' km', $
-        '  lat=', tang_lat[i], '  lon=', tang_lon[i]
+      i, '  t=', t[i], '  tang_alt=', ta / 1000.d0, ' km' + $
+      '  lat=', tang_lat[i], '  lon=', tang_lon[i]
   endfor
 
   ; ===========================================================================
   ; 8. EVENT DETECTION
   ; ===========================================================================
   ; Strategy:
-  ;   Step 1 — find complete occultation spans: contiguous intervals where
-  ;            tang_alt < altitude_max, bounded by crossings of altitude_max,
-  ;            and fully contained within the simulation (not clipped at t=0
-  ;            or t=end).  A span is complete if min(tang_alt) crosses 0.
+  ; Step 1 — find complete occultation spans: contiguous intervals where
+  ; tang_alt < altitude_max, bounded by crossings of altitude_max,
+  ; and fully contained within the simulation (not clipped at t=0
+  ; or t=end).  A span is complete if min(tang_alt) crosses 0.
   ;
-  ;   Step 2 — split each complete span at its 0-km crossing:
-  ;            INGRESS half: tang_alt descends from altitude_max to 0
-  ;            EGRESS  half: tang_alt ascends  from 0 to altitude_max
+  ; Step 2 — split each complete span at its 0-km crossing:
+  ; INGRESS half: tang_alt descends from altitude_max to 0
+  ; EGRESS  half: tang_alt ascends  from 0 to altitude_max
 
   ; --- Step 1: altitude_max crossing flags ---
   ; Seed boundaries so that a simulation starting/ending mid-span produces
@@ -212,85 +212,84 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   span_start_flags = bytarr(npts)
   span_start_flags[0] = (tang_alt[0] lt altitude_max)
   if npts gt 1 then $
-    span_start_flags[1:*] = (tang_alt[1:*] lt altitude_max) and $
-                            (tang_alt[0:npts-2] ge altitude_max)
+    span_start_flags[1 : *] = (tang_alt[1 : *] lt altitude_max) and $
+      (tang_alt[0 : npts - 2] ge altitude_max)
 
   span_end_flags = bytarr(npts)
-  span_end_flags[npts-1] = (tang_alt[npts-1] lt altitude_max)
+  span_end_flags[npts - 1] = (tang_alt[npts - 1] lt altitude_max)
   if npts gt 1 then $
-    span_end_flags[0:npts-2] = (tang_alt[0:npts-2] lt altitude_max) and $
-                               (tang_alt[1:*] ge altitude_max)
+    span_end_flags[0 : npts - 2] = (tang_alt[0 : npts - 2] lt altitude_max) and $
+      (tang_alt[1 : *] ge altitude_max)
 
   i_span_start = where(span_start_flags, n_span_start)
-  i_span_end   = where(span_end_flags,   n_span_end)
+  i_span_end = where(span_end_flags, n_span_end)
 
   ; --- Step 2: split spans into ING/EGR half-events ---
   event_template = { $
-    type:         'ING', $   ; 'ING' (descending) or 'EGR' (ascending)
-    i_start:      0l, $
-    i_end:        0l, $
-    t_start:      0.0d, $
-    t_end:        0.0d, $
-    duration:     0.0d, $
+    type: 'ING', $ ; 'ING' (descending) or 'EGR' (ascending)
+    i_start: 0l, $
+    i_end: 0l, $
+    t_start: 0.0d, $
+    t_end: 0.0d, $
+    duration: 0.0d, $
     tang_alt_min: 0.0d, $
-    t_min:        0.0d, $
-    lat_min:      0.0d, $
-    lon_min:      0.0d  $
+    t_min: 0.0d, $
+    lat_min: 0.0d, $
+    lon_min: 0.0d $
     }
 
   n_ingress = 0l
-  n_egress  = 0l
-  events    = -1
+  n_egress = 0l
+  events = -1
 
   n_spans = n_span_start < n_span_end
 
   if n_spans gt 0 then begin
     event_buf = replicate(event_template, 2l * n_spans)
-    n_events  = 0l
+    n_events = 0l
 
     for k = 0l, n_spans - 1l do begin
       ii = i_span_start[k]
       ie = i_span_end[k]
 
       ; Skip boundary-clipped spans and malformed pairs
-      if ii gt 0 and ie lt npts-1 and ie gt ii then begin
-
+      if ii gt 0 and ie lt npts - 1 and ie gt ii then begin
         ; Locate the 0-km descent crossing within this span
-        i_zd = where(tang_alt[ii:ie-1] ge 0.0d and tang_alt[ii+1:ie] lt 0.0d, n_zd)
+        i_zd = where(tang_alt[ii : ie - 1] ge 0.0d and tang_alt[ii + 1 : ie] lt 0.0d, n_zd)
         ; Locate the 0-km ascent crossing within this span
-        i_za = where(tang_alt[ii:ie-1] lt 0.0d and tang_alt[ii+1:ie] ge 0.0d, n_za)
+        i_za = where(tang_alt[ii : ie - 1] lt 0.0d and tang_alt[ii + 1 : ie] ge 0.0d, n_za)
 
         if n_zd ge 1 and n_za ge 1 then begin
-          j_ing_end   = ii + i_zd[0]      ; last step with tang_alt >= 0 before descent
-          j_egr_start = ii + i_za[0] + 1  ; first step with tang_alt >= 0 after ascent
+          j_ing_end = ii + i_zd[0] ; last step with tang_alt >= 0 before descent
+          j_egr_start = ii + i_za[0] + 1 ; first step with tang_alt >= 0 after ascent
 
           ; --- INGRESS event: altitude_max -> 0 (decreasing) ---
           ta_min = min(tang_alt[ii : j_ing_end], i_min_rel)
-          event_buf[n_events].type         = 'ING'
-          event_buf[n_events].i_start      = ii
-          event_buf[n_events].i_end        = j_ing_end
-          event_buf[n_events].t_start      = t[ii]
-          event_buf[n_events].t_end        = t[j_ing_end]
-          event_buf[n_events].duration     = t[j_ing_end] - t[ii]
+          event_buf[n_events].type = 'ING'
+          event_buf[n_events].i_start = ii
+          event_buf[n_events].i_end = j_ing_end
+          event_buf[n_events].t_start = t[ii]
+          event_buf[n_events].t_end = t[j_ing_end]
+          event_buf[n_events].duration = t[j_ing_end] - t[ii]
           event_buf[n_events].tang_alt_min = ta_min
-          event_buf[n_events].t_min        = t[ii + i_min_rel]
-          event_buf[n_events].lat_min      = tang_lat[ii + i_min_rel]
-          event_buf[n_events].lon_min      = tang_lon[ii + i_min_rel]
+          event_buf[n_events].t_min = t[ii + i_min_rel]
+          event_buf[n_events].lat_min = tang_lat[ii + i_min_rel]
+          event_buf[n_events].lon_min = tang_lon[ii + i_min_rel]
           n_events++
           n_ingress++
 
           ; --- EGRESS event: 0 -> altitude_max (increasing) ---
           ta_min = min(tang_alt[j_egr_start : ie], i_min_rel)
-          event_buf[n_events].type         = 'EGR'
-          event_buf[n_events].i_start      = j_egr_start
-          event_buf[n_events].i_end        = ie
-          event_buf[n_events].t_start      = t[j_egr_start]
-          event_buf[n_events].t_end        = t[ie]
-          event_buf[n_events].duration     = t[ie] - t[j_egr_start]
+          event_buf[n_events].type = 'EGR'
+          event_buf[n_events].i_start = j_egr_start
+          event_buf[n_events].i_end = ie
+          event_buf[n_events].t_start = t[j_egr_start]
+          event_buf[n_events].t_end = t[ie]
+          event_buf[n_events].duration = t[ie] - t[j_egr_start]
           event_buf[n_events].tang_alt_min = ta_min
-          event_buf[n_events].t_min        = t[j_egr_start + i_min_rel]
-          event_buf[n_events].lat_min      = tang_lat[j_egr_start + i_min_rel]
-          event_buf[n_events].lon_min      = tang_lon[j_egr_start + i_min_rel]
+          event_buf[n_events].t_min = t[j_egr_start + i_min_rel]
+          event_buf[n_events].lat_min = tang_lat[j_egr_start + i_min_rel]
+          event_buf[n_events].lon_min = tang_lon[j_egr_start + i_min_rel]
           n_events++
           n_egress++
         endif
@@ -336,13 +335,13 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   ; 10. RETURN STRUCTURE
   ; ===========================================================================
   survey = { $
-    time:      t, $
-    tang_alt:  tang_alt, $
-    tang_lat:  tang_lat, $
-    tang_lon:  tang_lon, $
-    n_int:     n_int, $
+    time: t, $
+    tang_alt: tang_alt, $
+    tang_lat: tang_lat, $
+    tang_lon: tang_lon, $
+    n_int: n_int, $
     n_ingress: n_ingress, $
-    n_egress:  n_egress, $
-    events:    events $
+    n_egress: n_egress, $
+    events: events $
     }
 end

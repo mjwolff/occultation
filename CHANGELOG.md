@@ -185,3 +185,25 @@ Update CHANGELOG
 
 Files changed:
   - CHANGELOG.md
+
+### f97c23b — 2026-03-21 13:25:22 +0100
+Add mars_occultation_survey example program
+
+Files changed:
+  - CHANGELOG.md
+  - examples/mars_occultation_survey.pro
+
+### 269fb18 — 2026-03-21 13:28:48 +0100
+Add osse_local_true_solar_time with unit tests
+
+Files changed:
+  - src/osse_local_true_solar_time.pro
+  - tests/osse_run_all_tests.pro
+  - tests/test_osse_local_true_solar_time.pro
+
+### 541d7bf — 2026-03-21 14:25:11 +0100
+Redesign survey event detection: separate ingress and egress half-events
+
+Files changed:
+  - README.md
+  - examples/mars_occultation_survey.pro
