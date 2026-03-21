@@ -30,3 +30,21 @@
        Note: files reside in separate repos; cross-reference commit links them.
        occultation:        mars_occultation_orbit.pro (this repo, items 2-8)
        satellite_position: sp_calculate_subsolar_longitude.pro (433c3ee, 76368be)
+
+10. [ ] Fix unhandled tangent-layer case in osse_construct_pathlength
+        src/osse_construct_pathlength.pro line 27 contains a debug STOP that
+        fires whenever path_length == s_exit - s_entry. This occurs for the
+        innermost intersected shell when the ray grazes the outer sphere but
+        does not penetrate the inner sphere (hit_outer=1, hit_inner=0). In
+        practice it is triggered when the tangent altitude falls exactly on a
+        1-km layer boundary (e.g. tang_alt = 50.000 km). The current first_one
+        block sets s_inbound=[s1_inner]=0 and s_outbound=[s2_inner]=0 before
+        the STOP, which is also wrong.
+        Fix: replace the STOP with correct handling for this case. The tangent
+        shell has no inner-sphere crossing; the natural split point is
+        s_tangent = -total(sat_pos * sun_dir) (the closest approach along the
+        ray). Set s_inbound=[s_tangent] and s_outbound=[s_tangent] for this
+        layer so the arrays correctly bracket the tangent point.
+        Acceptance: osse_construct_pathlength completes without error for a ray
+        with tangent altitude exactly 50.0 km; s_inbound and s_outbound are
+        non-empty and their difference gives a positive total path length.
