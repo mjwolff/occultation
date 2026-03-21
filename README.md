@@ -50,6 +50,11 @@ Generates 3D Cartesian positions along the ray at a target step size `ds_target`
 
 ---
 
+**`osse_local_true_solar_time`** *(function)*
+Computes Local True Solar Time (LTST) in decimal hours [0, 24) at one or more geographic longitudes given the sub-solar longitude at the observation epoch. LTST is 12:00 h when the Sun is on the meridian and advances by 1 h per 15° eastward. Accepts scalar or array longitude input; `ss_lon` must be a scalar (a property of the time instant, obtained from `sp_calculate_subsolar_longitude`).
+
+---
+
 **`osse_mars_coordinates`** *(file — multiple routines)*
 
 | Routine | Type | Purpose |
@@ -80,6 +85,8 @@ Multi-orbit survey that propagates the orbit, computes the tangent altitude at e
 | **EGRESS** | Starts when tang_alt crosses 0 km (ascending); ends when tang_alt crosses `altitude_max` (ascending) | Increasing |
 
 A complete solar occultation consists of one INGRESS followed by one EGRESS, separated by a sub-zero gap where the ray passes through the planet. Only event pairs where both halves fall entirely within the simulated interval are reported. Returns a `survey` structure containing the full `tang_alt` time series and an `events` array with one record per half-event (type, start/end times, duration, deepest-point latitude and longitude).
+
+Keywords: `NORBITS` (default 5), `DT` (default period/1000), `ALTITUDE_MAX` (default 100 km), `LSUBS` (areocentric solar longitude in degrees, default 90.0 — northern summer solstice), `VERBOSE`.
 
 ---
 

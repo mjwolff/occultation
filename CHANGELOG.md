@@ -207,3 +207,16 @@ Redesign survey event detection: separate ingress and egress half-events
 Files changed:
   - README.md
   - examples/mars_occultation_survey.pro
+
+### bf4f012 — 2026-03-21 14:31:27 +0100
+Linter formatting pass on mars_occultation_survey
+
+Files changed:
+  - CHANGELOG.md
+  - examples/mars_occultation_survey.pro
+
+### e05b883 — 2026-03-21 14:45:10 +0100
+Add LsubS as optional keyword to mars_occultation_survey
+
+Files changed:
+  - examples/mars_occultation_survey.pro
