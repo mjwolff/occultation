@@ -258,3 +258,42 @@ Files changed:
   - docs/TODO.md
   - docs/TODO_transmittance.md
   - examples/mars_example.pro
+
+### 06569cb — 2026-03-23 10:40:54 +0100
+Update CHANGELOG for 402766d
+
+Files changed:
+  - CHANGELOG.md
+
+### dd1bf3e — 2026-03-23 15:13:32 +0100
+Convert all distance units from meters to km across occultation repo
+
+Files changed:
+  - docs/UNIT_CONVERSION_m_to_km.md
+  - examples/mars_example.pro
+  - examples/mars_occultation_orbit.pro
+  - examples/mars_occultation_survey.pro
+  - osse_test_install.pro
+  - src/osse_calculate_transmittance.pro
+  - src/osse_cartesian_to_latlon.pro
+  - src/osse_conrath_density.pro
+  - src/osse_create_shell_intersection.pro
+  - src/osse_latlon_to_cartesian.pro
+  - src/osse_mars_params.pro
+  - src/osse_sspt_to_sun_direction.pro
+  - src/osse_trace_ray_occultation_3d.pro
+  - tests/test_osse_calculate_transmittance.pro
+  - tests/test_osse_cartesian_to_latlon.pro
+  - tests/test_osse_conrath_density.pro
+  - tests/test_osse_construct_pathlength.pro
+  - tests/test_osse_find_shell_intersection_3d.pro
+  - tests/test_osse_generate_integration_points.pro
+  - tests/test_osse_latlon_to_cartesian.pro
+  - tests/test_osse_sspt_to_sun_direction.pro
+  - tests/test_osse_trace_ray_occultation_3d.pro
+
+### 63ff2f7 — 2026-03-23 15:17:38 +0100
+Add conrath_density and calculate_transmittance to test suite
+
+Files changed:
+  - tests/osse_run_all_tests.pro
