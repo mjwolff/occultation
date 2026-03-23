@@ -19,7 +19,7 @@ pro mars_example
   print, format = '(A,F6.1,A)', 'Sub-solar longitude: ', ss_lon, '° E'
   print, ''
 
-  eps = 10. ; precision for tangent height comparison (m)
+  eps = 0.01d ; precision for tangent height comparison (km)
 
   ; Example: Occultation observed from satellite at specific lat/lon
   print, 'Example: Ray tracing with lat/lon inputs'
@@ -29,7 +29,7 @@ pro mars_example
   sat_lat = 0.0d ; 25° North
   ; sat_lon = 180 + (90. - 26.50137d0) ; 135° East
   sat_lon = 180 + (90. - 26.5d0) ; 135° East
-  sat_alt = 400.0d3 ; 400 km altitude
+  sat_alt = 400.0d0 ; 400 km altitude
   npts = 40
   sat_lon_arr = findgen(npts) * 0.1d0 + sat_lon
   sat_lon_arr = [sat_lon - (reverse(findgen(5)) + 1) * 0.1d0, sat_lon_arr]
@@ -37,7 +37,7 @@ pro mars_example
 
   print, format = '(A,F6.1,A)', 'Satellite latitude:  ', sat_lat, '° N'
   print, format = '(A,F6.1,A)', 'Satellite longitude: ', sat_lon, '° E'
-  print, format = '(A,F6.1,A)', 'Satellite altitude:  ', sat_alt / 1000.0d, ' km'
+  print, format = '(A,F6.1,A)', 'Satellite altitude:  ', sat_alt, ' km'
   print, ''
 
   path_info = ptrarr(npts, /allocate_heap)
@@ -61,7 +61,7 @@ pro mars_example
     s_tangent = -total(sat_pos * sun_dir)
     tangent_point = sat_pos + s_tangent * sun_dir
     res_tangent = osse_cartesian_to_latlon(tangent_point)
-    print, 'tangent: ', res_tangent.longitude, res_tangent.latitude, res_tangent.altitude / 1000.d0
+    print, 'tangent: ', res_tangent.longitude, res_tangent.latitude, res_tangent.altitude
     height[i] = res_tangent.altitude
     longitude[i] = res_tangent.longitude
     latitude[i] = res_tangent.latitude
@@ -76,7 +76,7 @@ pro mars_example
       message, 'tangent point heigh caculations differ.'
       stop
     endif
-    print, format = '(A,F9.4,A,i4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
+    print, format = '(A,F9.4,A,i4)', 'Tangent altitude: ', tang_alt, $
       ' km, Layers intersected: ', n_int
 
     ; compute line-of-sight transmittance through the atmosphere

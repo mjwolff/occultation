@@ -47,46 +47,46 @@ pro osse_test_install
   print, 'Test 1: Loading Mars parameters...'
   params = osse_mars_params()
   print, '  PASS - Mars parameters loaded'
-  print, '  R_MARS   = ', params.r_mars / 1000.d, ' km'
+  print, '  R_MARS   = ', params.r_mars, ' km'
   print, '  N_LAYERS = ', params.n_layers
   print, ''
 
   ; Test 2: Coordinate conversion round-trip
   print, 'Test 2: Coordinate conversion (lat/lon/alt -> Cartesian -> lat/lon/alt)...'
-  lat_in = 30.0d & lon_in = 45.0d & alt_in = 400.0d3
+  lat_in = 30.0d & lon_in = 45.0d & alt_in = 400.0d0
   pos = osse_latlon_to_cartesian(lat_in, lon_in, alt_in)
   coords = osse_cartesian_to_latlon(pos)
   err = abs(coords.latitude - lat_in) + abs(coords.longitude - lon_in) $
       + abs(coords.altitude - alt_in)
-  if err lt 1.0d then begin
-    print, '  PASS - Round-trip error < 1 m'
+  if err lt 0.001d then begin
+    print, '  PASS - Round-trip error < 0.001 km'
   endif else begin
-    print, '  FAIL - Round-trip error: ', err, ' m'
+    print, '  FAIL - Round-trip error: ', err, ' km'
     return
   endelse
   print, '  lat: ', lat_in, ' -> ', coords.latitude, ' deg'
   print, '  lon: ', lon_in, ' -> ', coords.longitude, ' deg'
-  print, '  alt: ', alt_in/1000.d, ' -> ', coords.altitude/1000.d, ' km'
+  print, '  alt: ', alt_in, ' -> ', coords.altitude, ' km'
   print, ''
 
   ; Test 3: Ray trace through atmosphere
   ; Satellite at 400 km altitude, ray angled to produce a 50 km tangent altitude
   print, 'Test 3: Ray tracing through Mars atmosphere...'
   R = params.r_mars
-  sat_pos = [R + 400.0d3, 0.0d, 0.0d]
-  impact_target = R + 50.0d3
-  sin_alpha = impact_target / (R + 400.0d3)
+  sat_pos = [R + 400.0d0, 0.0d, 0.0d]
+  impact_target = R + 50.0d0
+  sin_alpha = impact_target / (R + 400.0d0)
   cos_alpha = sqrt(1.0d - sin_alpha ^ 2)
   sun_dir = [-cos_alpha, sin_alpha, 0.0d]
   osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, intersections, $
     n_intersect, params = params
-  if n_intersect gt 0 and abs(tang_alt - 50.0d3) lt 1.0d then begin
+  if n_intersect gt 0 and abs(tang_alt - 50.0d0) lt 0.001d then begin
     print, '  PASS - Ray trace completed'
   endif else begin
     print, '  FAIL - Unexpected result'
     return
   endelse
-  print, '  Tangent altitude: ', tang_alt / 1000.d, ' km'
+  print, '  Tangent altitude: ', tang_alt, ' km'
   print, '  Layers intersected: ', n_intersect
   print, ''
 

@@ -76,7 +76,7 @@ pro osse_trace_ray_occultation_3d, sat_pos, sun_dir, tangent_altitude, $
 
   if keyword_set(verbose) then begin
     print, format = '("Tangent altitude: ", F10.2, " km")', $
-      tangent_altitude / 1000.0d
+      tangent_altitude
     print, format = '("Ray intersects ", I4, " atmospheric layers")', $
       n_intersect
   endif

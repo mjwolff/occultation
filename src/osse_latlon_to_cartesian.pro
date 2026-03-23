@@ -8,10 +8,10 @@
 ; Positive = North, Negative = South
 ; longitude - Longitude in degrees (0 to 360 or -180 to +180)
 ; Positive = East
-; altitude  - Altitude above Mars surface in meters
+; altitude  - Altitude above Mars surface in km
 ;
 ; RETURNS:
-; position - [3] array, Cartesian position vector in meters [x, y, z]
+; position - [3] array, Cartesian position vector in km [x, y, z]
 ; x: toward 0° longitude
 ; y: toward 90° E longitude
 ; z: toward north pole

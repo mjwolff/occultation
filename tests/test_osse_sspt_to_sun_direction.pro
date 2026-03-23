@@ -13,7 +13,7 @@ pro test_osse_sspt_to_sun_direction
   print, ''
 
   ; Satellite at equator, 0°E, 400 km — used throughout
-  sat_pos = osse_latlon_to_cartesian(0.0d, 0.0d, 400.0d3)
+  sat_pos = osse_latlon_to_cartesian(0.0d, 0.0d, 400.0d0)
 
   ; Test 1: Sub-solar at 0°N, 180°E — sun should be in -x direction
   print, 'Test 1: Sub-solar at 0°N 180°E (opposite satellite)'

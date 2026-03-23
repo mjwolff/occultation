@@ -26,7 +26,7 @@
 ; OUTPUTS:
 ;   Structure 'a' containing:
 ;     .time            - time array (seconds from epoch)
-;     .height          - tangent point altitude (m) at each time step
+;     .height          - tangent point altitude (km) at each time step
 ;     .longitude       - tangent point longitude (degrees)
 ;     .latitude        - tangent point latitude (degrees)
 ;     .n_intersections - number of atmospheric layers intersected
@@ -116,7 +116,7 @@ pro mars_occultation_orbit, verbose = verbose
   ; 4. OCCULTATION SETUP
   ; ===========================================================================
   params = osse_mars_params()
-  eps = 10.0d0 ; meters — tolerance for tangent height consistency check
+  eps = 0.01d0 ; km — tolerance for tangent height consistency check
 
   path_info = ptrarr(npts, /allocate_heap)
   height = dblarr(npts)
@@ -130,10 +130,10 @@ pro mars_occultation_orbit, verbose = verbose
   print, 'Performing ray trace...'
 
   for i = 0, npts - 1 do begin
-    ; Satellite position from propagator (alt: km -> m for occultation code)
+    ; Satellite position from propagator (alt already in km)
     sat_lat = result[i].lat
     sat_lon = result[i].lon
-    sat_alt = result[i].alt * 1.0d3 ; km -> meters
+    sat_alt = result[i].alt ; km
 
     ; Sub-solar longitude at this time step (Mars rotates east, footprint moves west)
     ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
@@ -147,7 +147,7 @@ pro mars_occultation_orbit, verbose = verbose
     tangent_point = sat_pos + s_tangent * sun_dir
     res_tangent = osse_cartesian_to_latlon(tangent_point)
     print, i, t[i], res_tangent.longitude, res_tangent.latitude, $
-      res_tangent.altitude / 1000.d0, ss_lon, ss_lat, $
+      res_tangent.altitude, ss_lon, ss_lat, $
       format = '(i6,1x,e15.8,1x,2(f7.2,1x),f8.1,1x,2(f7.2,1x))'
     height[i] = res_tangent.altitude
     longitude[i] = res_tangent.longitude

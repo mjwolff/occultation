@@ -29,7 +29,7 @@
 ; USAGE:
 ;   IDL> mars_occultation_survey
 ;   IDL> mars_occultation_survey, norbits=10, dt=5.0
-;   IDL> mars_occultation_survey, altitude_max=80.0d3
+;   IDL> mars_occultation_survey, altitude_max=80.0d0
 ;
 ; KEYWORDS:
 ;   NORBITS      - number of orbits to simulate (default: 5)
@@ -37,7 +37,7 @@
 ;                  At 400 km altitude the tangent altitude changes at
 ;                  ~1-3 km/s during limb crossing; the default dt gives
 ;                  ~100-300 m resolution in tangent altitude per event.
-;   ALTITUDE_MAX - upper tangent altitude boundary in meters
+;   ALTITUDE_MAX - upper tangent altitude boundary in km
 ;                  (default: params.h_atm = 100 km).
 ;                  Events are bounded by crossings of this level and 0 km.
 ;   LSUBS        - areocentric solar longitude in degrees (default: 90.0,
@@ -52,7 +52,7 @@
 ; OUTPUTS:
 ;   Structure 'survey' containing:
 ;     .time       - time array (s from epoch)
-;     .tang_alt   - tangent altitude at each step (m)
+;     .tang_alt   - tangent altitude at each step (km)
 ;     .tang_lat   - tangent point latitude (deg)
 ;     .tang_lon   - tangent point longitude (deg)
 ;     .n_int      - number of atmospheric layers intersected
@@ -69,7 +69,7 @@
 ;     .t_start     - time of event start (s)
 ;     .t_end       - time of event end (s)
 ;     .duration    - event duration (s)
-;     .tang_alt_min - minimum tangent altitude within event window (m);
+;     .tang_alt_min - minimum tangent altitude within event window (km);
 ;                    near 0 for both event types (deepest atmospheric point)
 ;     .t_min       - time of minimum tangent altitude (s)
 ;     .lat_min     - tangent point latitude at minimum (deg)
@@ -90,7 +90,8 @@
 ;               half-events separately, each bounded by altitude_max and 0
 ;-
 
-pro mars_occultation_survey, norbits = norbits, dt = dt, $
+pro mars_occultation_survey, survey = survey, $
+  norbits = norbits, dt = dt, $
   altitude_max = altitude_max, lsubs = LsubS, verbose = verbose
   compile_opt idl2
 
@@ -153,7 +154,7 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   print, format = '(A,F6.1,A)', 'Time step:            ', dt, ' s'
   print, format = '(A,I0)', 'Total time steps:     ', npts
   print, format = '(A,F6.2,A)', 'Sub-solar latitude:   ', ss_lat, ' deg'
-  print, format = '(A,F6.2,A)', 'Altitude max:         ', altitude_max / 1000.d0, ' km'
+  print, format = '(A,F6.2,A)', 'Altitude max:         ', altitude_max, ' km'
   print, ''
 
   ; ===========================================================================
@@ -173,7 +174,7 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   print, 'Computing tangent altitudes...'
 
   for i = 0l, npts - 1l do begin
-    sat_alt = orb[i].alt * 1.0d3 ; km -> m
+    sat_alt = orb[i].alt ; km
     sat_pos = osse_latlon_to_cartesian(orb[i].lat, orb[i].lon, sat_alt)
 
     ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
@@ -192,7 +193,7 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
 
     if keyword_set(verbose) then $
       print, format = '(I6,A,E14.6,A,F8.2,A,F7.2,A,F7.2)', $
-      i, '  t=', t[i], '  tang_alt=', ta / 1000.d0, ' km' + $
+      i, '  t=', t[i], '  tang_alt=', ta, ' km' + $
       '  lat=', tang_lat[i], '  lon=', tang_lon[i]
   endfor
 
@@ -324,7 +325,7 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
         events[k].t_start, $
         events[k].t_end, $
         events[k].duration, $
-        events[k].tang_alt_min / 1000.d0, $
+        events[k].tang_alt_min, $
         events[k].lat_min, $
         events[k].lon_min
     endfor

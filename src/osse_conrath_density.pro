@@ -18,14 +18,14 @@
 ;   N = osse_conrath_density(altitude)
 ;
 ; INPUTS:
-;   altitude  - Altitude above the Mars surface in metres.  Scalar or
+;   altitude  - Altitude above the Mars surface in km.  Scalar or
 ;               any-size array.
 ;
 ; KEYWORD INPUTS:
 ;   N_REF     - Surface number density in m^-3.  Default: 1.0e20.
 ;   NU        - Conrath shape parameter (dimensionless).  Controls how
 ;               rapidly the density falls off above H_c.  Default: 0.007.
-;   H_CONRATH - Characteristic height scale in metres.  Default: 10.0e3
+;   H_CONRATH - Characteristic height scale in km.  Default: 10.0d0
 ;               (10 km).
 ;
 ; OUTPUTS:
@@ -36,11 +36,11 @@
 ;   print, osse_conrath_density(0.0d)                     ; -> 1.0e20
 ;
 ;   ; Profile at several altitudes
-;   z = [0.0d, 10.0d, 50.0d, 100.0d] * 1.0d3
+;   z = [0.0d, 10.0d, 50.0d, 100.0d]
 ;   print, osse_conrath_density(z)
 ;
 ;   ; Custom species parameters
-;   N = osse_conrath_density(z, n_ref=2.5d19, nu=0.01d, h_conrath=8.0d3)
+;   N = osse_conrath_density(z, n_ref=2.5d19, nu=0.01d, h_conrath=8.0d0)
 ;
 ; NOTES:
 ;   - At z = 0 the exponent reduces to nu*(1-1) = 0, so N = N_ref exactly
@@ -57,7 +57,7 @@ function osse_conrath_density, altitude, n_ref = n_ref, nu = nu, h_conrath = h_c
 
   if n_elements(n_ref)     eq 0 then n_ref     = 1.0d20
   if n_elements(nu)        eq 0 then nu        = 0.007d0
-  if n_elements(h_conrath) eq 0 then h_conrath = 10.0d3
+  if n_elements(h_conrath) eq 0 then h_conrath = 10.0d0
 
   return, n_ref * exp(nu * (1.0d0 - exp(altitude / h_conrath)))
 end

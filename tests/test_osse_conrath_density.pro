@@ -27,13 +27,13 @@ pro test_osse_conrath_density
 
   ; --- Test 3: z=70 km < 0.001 * N_ref (default parameters) ---
   ; With nu=0.007, h_conrath=10 km: exp(0.007*(1-exp(7))) ~ 4.6e-4
-  result = osse_conrath_density(70.0d3)
+  result = osse_conrath_density(70.0d0)
   if result ge 0.001d0 * n_ref_default then $
     message, 'Test 3 FAILED: z=70 km should be < 0.001 * N_ref'
   print, format = '(A,E10.3,A)', 'Test 3 PASSED: z=70 km -> ', result, ' m^-3 (< 0.001 * N_ref)'
 
   ; --- Test 4: profile decreases monotonically with altitude ---
-  z_arr = [0.0d0, 10.0d3, 20.0d3, 50.0d3, 100.0d3]
+  z_arr = [0.0d0, 10.0d0, 20.0d0, 50.0d0, 100.0d0]
   n_arr = osse_conrath_density(z_arr)
   for i = 1, n_elements(n_arr) - 1 do begin
     if n_arr[i] ge n_arr[i - 1] then $
@@ -43,7 +43,7 @@ pro test_osse_conrath_density
 
   ; --- Test 5: array input returns array of correct size ---
   n_pts = 500L
-  z_large = dindgen(n_pts) * 200.0d0  ; 0 to 99.8 km in 200 m steps
+  z_large = dindgen(n_pts) * 0.2d0  ; 0 to 99.8 km in 0.2 km steps
   result_arr = osse_conrath_density(z_large)
   if n_elements(result_arr) ne n_pts then $
     message, 'Test 5 FAILED: output size does not match input size'
@@ -51,24 +51,24 @@ pro test_osse_conrath_density
 
   ; --- Test 6: custom nu keyword changes profile shape ---
   ; Larger nu -> faster falloff -> lower density at z=10 km
-  n_low_nu  = osse_conrath_density(10.0d3, nu = 0.007d0)
-  n_high_nu = osse_conrath_density(10.0d3, nu = 1.0d0)
+  n_low_nu  = osse_conrath_density(10.0d0, nu = 0.007d0)
+  n_high_nu = osse_conrath_density(10.0d0, nu = 1.0d0)
   if n_high_nu ge n_low_nu then $
     message, 'Test 6 FAILED: larger nu should give lower density at z=10 km'
   print, 'Test 6 PASSED: larger nu gives lower density (faster falloff)'
 
   ; --- Test 7: large h_conrath gives near-constant profile (approaches N_ref) ---
-  ; h_conrath = 1e9 m: exp(z/h_conrath) ~= 1 for z <= 100 km
+  ; h_conrath = 1e6 km: exp(z/h_conrath) ~= 1 for z <= 100 km
   ; so N ~= N_ref * exp(0) = N_ref at all altitudes
-  z_check = 50.0d3  ; 50 km
-  result_flat = osse_conrath_density(z_check, h_conrath = 1.0d9)
+  z_check = 50.0d0  ; 50 km
+  result_flat = osse_conrath_density(z_check, h_conrath = 1.0d6)
   if abs(result_flat - n_ref_default) / n_ref_default gt 1.0d-4 then $
     message, 'Test 7 FAILED: very large h_conrath should give near-constant profile'
-  print, 'Test 7 PASSED: h_conrath=1e9 m gives near-constant profile at 50 km'
+  print, 'Test 7 PASSED: h_conrath=1e6 km gives near-constant profile at 50 km'
 
   ; --- Test 8: analytical value check at z=10 km with default parameters ---
   ; N(10 km) = N_ref * exp(0.007 * (1 - exp(1)))
-  z_test    = 10.0d3
+  z_test    = 10.0d0
   expected  = n_ref_default * exp(0.007d0 * (1.0d0 - exp(1.0d0)))
   result    = osse_conrath_density(z_test)
   if abs(result - expected) / expected gt tol_rel then $

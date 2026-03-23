@@ -4,7 +4,7 @@
 ; Computes sun direction vector from satellite position and sub-solar point
 ;
 ; INPUT:
-; sat_position - [3] array, Satellite Cartesian position in meters
+; sat_position - [3] array, Satellite Cartesian position in km
 ; subsolar_lat - Sub-solar point latitude in degrees
 ; subsolar_lon - Sub-solar point longitude in degrees
 ;
@@ -25,8 +25,8 @@ function osse_sspt_to_sun_direction, subsolar_lat, subsolar_lon, sat_position=sa
 
   compile_opt idl2
 
-  ; 1 au in meters
-  if N_ELEMENTS(sun_distance) ne 1 then sun_distance = 1.52d0 * 1.496d+11
+  ; 1 au in km
+  if N_ELEMENTS(sun_distance) ne 1 then sun_distance = 1.52d0 * 1.496d+8
 
   ; Convert sub-solar point to Cartesian (unit vector from Mars center)
   lat_rad = subsolar_lat * !dtor

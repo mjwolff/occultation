@@ -16,14 +16,14 @@ pro test_osse_generate_integration_points
   R = params.r_mars
 
   ; Shared geometry: tangent at 50.5 km → 49 intersecting layers
-  sat_pos = [R + 400.0d3, 0.0d, 0.0d]
-  impact_target = R + 50.5d3
-  sin_alpha = impact_target / (R + 400.0d3)
+  sat_pos = [R + 400.0d0, 0.0d, 0.0d]
+  impact_target = R + 50.5d0
+  sin_alpha = impact_target / (R + 400.0d0)
   cos_alpha = sqrt(1.0d - sin_alpha ^ 2)
   sun_dir = [-cos_alpha, sin_alpha, 0.0d]
   sun_dir_norm = sun_dir / sqrt(total(sun_dir ^ 2))
   osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, isects, n_int, params = params
-  print, format = '(A,F6.1,A,I3,A)', 'Geometry: tang_alt=', tang_alt/1000.d, ' km, n_int=', n_int, ' layers'
+  print, format = '(A,F6.1,A,I3,A)', 'Geometry: tang_alt=', tang_alt, ' km, n_int=', n_int, ' layers'
 
   ; ------------------------------------------------------------------
   ; Test 1: All points lie on the ray
@@ -32,7 +32,7 @@ pro test_osse_generate_integration_points
   ; ------------------------------------------------------------------
   print, 'Test 1: All integration points lie on the ray (cross-product near 0)'
   osse_generate_integration_points, sat_pos, sun_dir_norm, isects, $
-    ipts, n_pts, 1000.0d, params = params
+    ipts, n_pts, 1.0d0, params = params
   max_cross = 0.0d
   for k = 0l, n_pts - 1 do begin
     dv = ipts[*, k] - sat_pos
@@ -62,7 +62,7 @@ pro test_osse_generate_integration_points
   ; ------------------------------------------------------------------
   print, 'Test 3: ds_target=1 m → n_points capped at MAX_INT_PTS'
   osse_generate_integration_points, sat_pos, sun_dir_norm, isects, $
-    ipts, n_pts, 1.0d, params = params
+    ipts, n_pts, 0.001d0, params = params
   print, format = '(A,I6)', '  MAX_INT_PTS:          ', params.max_int_pts
   print, format = '(A,I6)', '  n_points (expect cap):', n_pts
   print, format = '(A,I2)', '  n_points <= MAX_INT_PTS (expect 1): ', $
@@ -73,12 +73,12 @@ pro test_osse_generate_integration_points
   ; Test 4: All points lie within the atmosphere (altitude 0-100 km)
   ; A tolerance of 1 m is allowed for floating-point rounding at shell boundaries.
   ; ------------------------------------------------------------------
-  print, 'Test 4: All points within atmosphere (0-100 km, 1 m tolerance)'
+  print, 'Test 4: All points within atmosphere (0-100 km, 0.001 km tolerance)'
   osse_generate_integration_points, sat_pos, sun_dir_norm, isects, $
-    ipts, n_pts, 1000.0d, params = params
+    ipts, n_pts, 1.0d0, params = params
   r_pts = sqrt(ipts[0,*]^2 + ipts[1,*]^2 + ipts[2,*]^2)
   alt_pts = r_pts - R
-  n_out = total(alt_pts lt -1.0d or alt_pts gt params.h_atm + 1.0d)
+  n_out = total(alt_pts lt -0.001d or alt_pts gt params.h_atm + 0.001d)
   print, format = '(A,I6)', '  n_points total:                        ', n_pts
   print, format = '(A,I4)', '  n_points outside atm+1m (expect 0):   ', fix(n_out)
   print, ''
