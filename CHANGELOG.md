@@ -227,3 +227,12 @@ Update README for osse_local_true_solar_time and LsubS keyword
 Files changed:
   - CHANGELOG.md
   - README.md
+
+### d242db9 — 2026-03-23 09:11:38 +0100
+Linter formatting pass on mars_example and orbit examples; remove unused quiet variable
+
+Files changed:
+  - CHANGELOG.md
+  - examples/mars_example.pro
+  - examples/mars_occultation_orbit.pro
+  - examples/mars_occultation_survey.pro

@@ -48,3 +48,30 @@
         Acceptance: osse_construct_pathlength completes without error for a ray
         with tangent altitude exactly 50.0 km; s_inbound and s_outbound are
         non-empty and their difference gives a positive total path length.
+
+11. [ ] Add Solar Zenith Angle output to mars_example.pro
+        Call osse_sza(tang_lat, tang_lon, ss_lat, ss_lon) inside the loop.
+        Add sza field to the output struct a.
+        Acceptance: sza values printed per step; stored in a.sza array.
+
+12. [ ] Add Local True Solar Time output to mars_example.pro
+        Call osse_local_true_solar_time(tang_lon, ss_lon) inside the loop.
+        Add ltst field to the output struct a.
+        Acceptance: ltst values in [0, 24) hours printed per step; stored in a.ltst array.
+
+13. [ ] Demonstrate osse_generate_integration_points in mars_example.pro
+        Replace or supplement osse_construct_pathlength with
+        osse_generate_integration_points at a target step size ds_target.
+        Acceptance: integration points generated at uniform spacing; path_info
+        updated to use the finer grid.
+
+14. [ ] Print path altitude profile for one representative position
+        After the main loop, select one position where n_int > 0 and print
+        the altitude profile from path_info (path_altitude array).
+        Acceptance: altitude values along the sightline printed to console,
+        showing inbound descent, tangent point, and outbound ascent.
+
+15. [ ] Implement line-of-sight transmittance integration
+        See docs/TODO_transmittance.md for full step-by-step breakdown.
+        Involves: osse_conrath_density, osse_calculate_transmittance,
+        unit tests, and integration into mars_example.pro.
