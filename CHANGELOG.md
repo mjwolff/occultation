@@ -297,3 +297,15 @@ Add conrath_density and calculate_transmittance to test suite
 
 Files changed:
   - tests/osse_run_all_tests.pro
+
+### 01ff625 — 2026-03-23 15:18:06 +0100
+Update CHANGELOG
+
+Files changed:
+  - CHANGELOG.md
+
+### e9c5a0e — 2026-03-23 15:21:06 +0100
+Add TESTS.md: unit test documentation with validation sources
+
+Files changed:
+  - tests/TESTS.md
