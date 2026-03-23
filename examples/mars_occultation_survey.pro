@@ -66,14 +66,24 @@
 ;   Each event struct contains:
 ;     .type        - 'ING' (tangent alt decreasing, altitude_max -> 0)
 ;                    or 'EGR' (tangent alt increasing, 0 -> altitude_max)
-;     .i_start     - step index of event start
-;     .i_end       - step index of event end
-;     .t_start     - interpolated time of start threshold crossing (s)
-;     .t_end       - interpolated time of end threshold crossing (s)
-;     .t_start_nn  - time of nearest sample at or past the start crossing (s)
-;     .t_end_nn    - time of nearest sample at or past the end crossing (s)
-;     .duration    - event duration derived from interpolated t_start/t_end (s)
-;     .tang_alt_min - minimum tangent altitude within event window (km);
+;     .i_start     - index of first sample inside the event window:
+;                    ING: first sample with tang_alt < altitude_max
+;                    EGR: first sample with tang_alt >= 0
+;     .i_end       - index of last sample inside the event window:
+;                    ING: last sample with tang_alt >= 0
+;                    EGR: last sample with tang_alt < altitude_max
+;     .t_start     - linearly interpolated time of the start threshold crossing (s):
+;                    ING: when tang_alt descends through altitude_max
+;                    EGR: when tang_alt ascends through 0 km
+;     .t_end       - linearly interpolated time of the end threshold crossing (s):
+;                    ING: when tang_alt descends through 0 km
+;                    EGR: when tang_alt ascends through altitude_max
+;     .t_start_nn  - time of the nearest sampled step at the start crossing (s);
+;                    equals t[i_start] (first sample inside the event window)
+;     .t_end_nn    - time of the nearest sampled step at the end crossing (s);
+;                    equals t[i_end] (last sample inside the event window)
+;     .duration    - t_end - t_start using the interpolated crossing times (s)
+;     .tang_alt_min - minimum tangent altitude within the event window (km);
 ;                    near 0 for both event types (deepest atmospheric point)
 ;     .t_min       - time of minimum tangent altitude (s)
 ;     .lat_min     - tangent point latitude at minimum (deg)
@@ -87,6 +97,12 @@
 ;     (altitude_max crossing in to altitude_max crossing out) that are fully
 ;     contained within the simulation; (2) split each span at its 0-km
 ;     crossing to produce the ING and EGR half-events.
+;   - Crossing times (t_start, t_end) are estimated by linear interpolation
+;     between the two bracketing samples on either side of each threshold.
+;     The nearest-sample equivalents (t_start_nn, t_end_nn) are provided for
+;     cases where the sampled grid is sufficient or interpolation is not
+;     desired. The difference |t_start - t_start_nn| is at most dt/2 and is
+;     typically much smaller for smooth tangent altitude profiles.
 ;
 ; MODIFICATION HISTORY:
 ;   2026-03-21: Initial implementation
