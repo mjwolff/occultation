@@ -45,6 +45,7 @@
 ; MODIFICATION HISTORY:
 ;   2026-03-18: Initial implementation
 ;   2026-03-20: Add VERBOSE keyword; pass through to ray-trace routines
+;   2026-03-23: remove QUIET (no longer being used)
 ;-
 
 pro mars_occultation_orbit, verbose = verbose
@@ -115,7 +116,6 @@ pro mars_occultation_orbit, verbose = verbose
   ; 4. OCCULTATION SETUP
   ; ===========================================================================
   params = osse_mars_params()
-  quiet = 0
   eps = 10.0d0 ; meters — tolerance for tangent height consistency check
 
   path_info = ptrarr(npts, /allocate_heap)

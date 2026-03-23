@@ -220,3 +220,10 @@ Add LsubS as optional keyword to mars_occultation_survey
 
 Files changed:
   - examples/mars_occultation_survey.pro
+
+### dd98a5c — 2026-03-21 14:48:25 +0100
+Update README for osse_local_true_solar_time and LsubS keyword
+
+Files changed:
+  - CHANGELOG.md
+  - README.md

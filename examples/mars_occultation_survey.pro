@@ -91,7 +91,7 @@
 ;-
 
 pro mars_occultation_survey, norbits = norbits, dt = dt, $
-  altitude_max = altitude_max, LsubS = LsubS, verbose = verbose
+  altitude_max = altitude_max, lsubs = LsubS, verbose = verbose
   compile_opt idl2
 
   ; ===========================================================================
@@ -131,8 +131,8 @@ pro mars_occultation_survey, norbits = norbits, dt = dt, $
   ; ===========================================================================
   ; 3. SUB-SOLAR GEOMETRY  — USER CONFIGURATION
   ; ===========================================================================
-  if n_elements(LsubS) eq 0 then LsubS = 90.0d0  ; default: northern summer solstice
-  ss_lat       = sp_calculate_subsolar_latitude(LsubS, /degrees)
+  if n_elements(LsubS) eq 0 then LsubS = 90.0d0 ; default: northern summer solstice
+  ss_lat = sp_calculate_subsolar_latitude(LsubS, /degrees)
   ss_lon_at_t0 = 0.0d0 ; sub-solar longitude at epoch t0 (degrees)
 
   ; ===========================================================================
