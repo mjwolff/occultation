@@ -32,6 +32,8 @@
 ;   IDL> mars_occultation_survey, altitude_max=80.0d0
 ;
 ; KEYWORDS:
+;   SURVEY       - named output variable that receives the result structure
+;                  (see OUTPUTS below). Must be supplied to retrieve results.
 ;   NORBITS      - number of orbits to simulate (default: 5)
 ;   DT           - time step in seconds (default: orbital period / 1000).
 ;                  At 400 km altitude the tangent altitude changes at
