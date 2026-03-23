@@ -309,3 +309,15 @@ Add TESTS.md: unit test documentation with validation sources
 
 Files changed:
   - tests/TESTS.md
+
+### de73cea — 2026-03-23 15:22:18 +0100
+Update CHANGELOG
+
+Files changed:
+  - CHANGELOG.md
+
+### 9339459 — 2026-03-23 15:24:12 +0100
+Document SURVEY output keyword in mars_occultation_survey header
+
+Files changed:
+  - examples/mars_occultation_survey.pro
