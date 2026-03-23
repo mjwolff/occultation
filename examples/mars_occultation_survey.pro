@@ -58,6 +58,9 @@
 ;     .tang_lat   - tangent point latitude (deg)
 ;     .tang_lon   - tangent point longitude (deg)
 ;     .n_int      - number of atmospheric layers intersected
+;     .sat_lat    - spacecraft geodetic latitude at each step (deg)
+;     .sat_lon    - spacecraft geodetic longitude at each step (deg)
+;     .sat_alt    - spacecraft altitude at each step (km)
 ;     .ss_lat     - sub-solar latitude (deg); scalar, constant for fixed LsubS
 ;     .ss_lon     - sub-solar longitude at each time step (deg)
 ;     .n_ingress  - number of ingress events found
@@ -199,11 +202,17 @@ pro mars_occultation_survey, survey = survey, $
   tang_lon = dblarr(npts)
   n_int = lonarr(npts)
   ss_lon_arr = dblarr(npts)
+  sat_lat_arr = dblarr(npts)
+  sat_lon_arr = dblarr(npts)
+  sat_alt_arr = dblarr(npts)
 
   print, 'Computing tangent altitudes...'
 
   for i = 0l, npts - 1l do begin
     sat_alt = orb[i].alt ; km
+    sat_lat_arr[i] = orb[i].lat
+    sat_lon_arr[i] = orb[i].lon
+    sat_alt_arr[i] = sat_alt
     sat_pos = osse_latlon_to_cartesian(orb[i].lat, orb[i].lon, sat_alt)
 
     ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
@@ -407,6 +416,9 @@ pro mars_occultation_survey, survey = survey, $
     tang_lat: tang_lat, $
     tang_lon: tang_lon, $
     n_int: n_int, $
+    sat_lat: sat_lat_arr, $
+    sat_lon: sat_lon_arr, $
+    sat_alt: sat_alt_arr, $
     ss_lat: ss_lat, $
     ss_lon: ss_lon_arr, $
     n_ingress: n_ingress, $
