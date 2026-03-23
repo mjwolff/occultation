@@ -248,3 +248,13 @@ Files changed:
   - src/osse_conrath_density.pro
   - tests/test_osse_calculate_transmittance.pro
   - tests/test_osse_conrath_density.pro
+
+### 402766d — 2026-03-23 10:40:19 +0100
+Integrate transmittance into mars_example; update CLAUDE.md IDL invocation
+
+Files changed:
+  - CHANGELOG.md
+  - CLAUDE.md
+  - docs/TODO.md
+  - docs/TODO_transmittance.md
+  - examples/mars_example.pro
