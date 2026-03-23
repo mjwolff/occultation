@@ -71,7 +71,7 @@
         Acceptance: altitude values along the sightline printed to console,
         showing inbound descent, tangent point, and outbound ascent.
 
-15. [ ] Implement line-of-sight transmittance integration
+15. [x] Implement line-of-sight transmittance integration
         See docs/TODO_transmittance.md for full step-by-step breakdown.
         Involves: osse_conrath_density, osse_calculate_transmittance,
         unit tests, and integration into mars_example.pro.

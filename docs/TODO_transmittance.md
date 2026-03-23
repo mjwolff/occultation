@@ -34,7 +34,7 @@
        Acceptance: computed T matches analytical value within 1%;
        n_int=0 case returns T = 1.0 exactly.
 
-5. [ ] Integrate transmittance into `examples/mars_example.pro`
+5. [x] Integrate transmittance into `examples/mars_example.pro`
        Add transmittance = dblarr(npts) before the main loop.
        Call osse_calculate_transmittance inside the loop after
        osse_construct_pathlength; print T per step; add transmittance

@@ -19,7 +19,6 @@ pro mars_example
   print, format = '(A,F6.1,A)', 'Sub-solar longitude: ', ss_lon, '° E'
   print, ''
 
-  quiet = 0
   eps = 10. ; precision for tangent height comparison (m)
 
   ; Example: Occultation observed from satellite at specific lat/lon
@@ -46,6 +45,7 @@ pro mars_example
   longitude = dblarr(npts)
   latitude = dblarr(npts)
   n_intersections = intarr(npts)
+  transmittance = dblarr(npts)
 
   params = osse_mars_params()
 
@@ -70,7 +70,7 @@ pro mars_example
     ; print, format = '(A,3F12.1)', '  Satellite position (m): ', sat_pos
 
     ; Trace the ray from spacecraft towards sun, calculating intersections with atmospheric layers
-    osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, intersections, n_int, quiet = quiet
+    osse_trace_ray_occultation_3d, sat_pos, sun_dir, tang_alt, intersections, n_int
     n_intersections[i] = n_int
     if abs(tang_alt - res_tangent.altitude) gt eps then begin
       message, 'tangent point heigh caculations differ.'
@@ -78,6 +78,11 @@ pro mars_example
     endif
     print, format = '(A,F9.4,A,i4)', 'Tangent altitude: ', tang_alt / 1000.0d, $
       ' km, Layers intersected: ', n_int
+
+    ; compute line-of-sight transmittance through the atmosphere
+    transmittance[i] = osse_calculate_transmittance(sat_pos, sun_dir, intersections, n_int, $
+      params = params)
+    print, format = '(A,F10.6)', 'Transmittance:    ', transmittance[i]
 
     ; get integration points along sightline, and combine with tangent point
     ; if no intersections, then we can skip the pathlength determination
@@ -120,7 +125,7 @@ pro mars_example
   endfor
 
   a = {height: height, longitude: longitude, latitude: latitude, n_intersections: n_intersections, $
-    path_info: path_info}
+    transmittance: transmittance, path_info: path_info}
 
   ; Calculate column density
   ; ;  col_dens = integrate_column_density(sat_pos, sun_dir, intersections, $

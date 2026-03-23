@@ -236,3 +236,15 @@ Files changed:
   - examples/mars_example.pro
   - examples/mars_occultation_orbit.pro
   - examples/mars_occultation_survey.pro
+
+### 537ef14 — 2026-03-23 10:22:09 +0100
+Add LOS transmittance: Conrath density profile and integration function
+
+Files changed:
+  - CHANGELOG.md
+  - docs/TODO.md
+  - docs/TODO_transmittance.md
+  - src/osse_calculate_transmittance.pro
+  - src/osse_conrath_density.pro
+  - tests/test_osse_calculate_transmittance.pro
+  - tests/test_osse_conrath_density.pro
