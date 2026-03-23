@@ -93,6 +93,8 @@
 ;                    near altitude_max for both event types
 ;     .lat_max     - tangent point latitude at maximum tangent altitude (deg)
 ;     .lon_max     - tangent point longitude at maximum tangent altitude (deg)
+;     .ss_lat      - sub-solar latitude at the time of minimum tangent altitude (deg)
+;     .ss_lon      - sub-solar longitude at the time of minimum tangent altitude (deg)
 ;
 ; NOTES:
 ;   - Uses ROUTINE_FILEPATH for path setup (IDL 8.0+)
@@ -196,6 +198,7 @@ pro mars_occultation_survey, survey = survey, $
   tang_lat = dblarr(npts)
   tang_lon = dblarr(npts)
   n_int = lonarr(npts)
+  ss_lon_arr = dblarr(npts)
 
   print, 'Computing tangent altitudes...'
 
@@ -204,6 +207,7 @@ pro mars_occultation_survey, survey = survey, $
     sat_pos = osse_latlon_to_cartesian(orb[i].lat, orb[i].lon, sat_alt)
 
     ss_lon = sp_calculate_subsolar_longitude(t[i], t0, ss_lon_at_t0, mars)
+    ss_lon_arr[i] = ss_lon
     sun_dir = osse_sspt_to_sun_direction(ss_lat, ss_lon, sat_position = sat_pos)
 
     osse_trace_ray_occultation_3d, sat_pos, sun_dir, ta, isects, ni, params = params
@@ -270,7 +274,9 @@ pro mars_occultation_survey, survey = survey, $
     lon_min: 0.0d, $
     tang_alt_max: 0.0d, $
     lat_max: 0.0d, $
-    lon_max: 0.0d $
+    lon_max: 0.0d, $
+    ss_lat: 0.0d, $
+    ss_lon: 0.0d $
     }
 
   n_ingress = 0l
@@ -322,6 +328,8 @@ pro mars_occultation_survey, survey = survey, $
           event_buf[n_events].tang_alt_max = ta_max
           event_buf[n_events].lat_max = tang_lat[ii + i_max_rel]
           event_buf[n_events].lon_max = tang_lon[ii + i_max_rel]
+          event_buf[n_events].ss_lat = ss_lat
+          event_buf[n_events].ss_lon = ss_lon_arr[ii + i_min_rel]
           n_events++
           n_ingress++
 
@@ -349,6 +357,8 @@ pro mars_occultation_survey, survey = survey, $
           event_buf[n_events].tang_alt_max = ta_max
           event_buf[n_events].lat_max = tang_lat[j_egr_start + i_max_rel]
           event_buf[n_events].lon_max = tang_lon[j_egr_start + i_max_rel]
+          event_buf[n_events].ss_lat = ss_lat
+          event_buf[n_events].ss_lon = ss_lon_arr[j_egr_start + i_min_rel]
           n_events++
           n_egress++
         endif
