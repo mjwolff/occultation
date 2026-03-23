@@ -321,3 +321,27 @@ Document SURVEY output keyword in mars_occultation_survey header
 
 Files changed:
   - examples/mars_occultation_survey.pro
+
+### 26339b3 — 2026-03-23 15:28:07 +0100
+Update CHANGELOG
+
+Files changed:
+  - CHANGELOG.md
+
+### d51586e — 2026-03-23 16:17:20 +0100
+Add interpolated t_start/t_end and nearest-sample _nn fields to survey events
+
+Files changed:
+  - examples/mars_occultation_survey.pro
+
+### 2434320 — 2026-03-23 16:18:47 +0100
+Expand header docs for interpolated event times in mars_occultation_survey
+
+Files changed:
+  - examples/mars_occultation_survey.pro
+
+### b7ac7f7 — 2026-03-23 16:23:19 +0100
+Add ingress byte flag to survey event struct
+
+Files changed:
+  - examples/mars_occultation_survey.pro

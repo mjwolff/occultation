@@ -74,22 +74,25 @@
 ;     .i_end       - index of last sample inside the event window:
 ;                    ING: last sample with tang_alt >= 0
 ;                    EGR: last sample with tang_alt < altitude_max
-;     .t_start     - linearly interpolated time of the start threshold crossing (s):
+;     .t_start_interp - linearly interpolated time of the start threshold crossing (s):
 ;                    ING: when tang_alt descends through altitude_max
 ;                    EGR: when tang_alt ascends through 0 km
-;     .t_end       - linearly interpolated time of the end threshold crossing (s):
+;     .t_end_interp - linearly interpolated time of the end threshold crossing (s):
 ;                    ING: when tang_alt descends through 0 km
 ;                    EGR: when tang_alt ascends through altitude_max
 ;     .t_start_nn  - time of the nearest sampled step at the start crossing (s);
 ;                    equals t[i_start] (first sample inside the event window)
 ;     .t_end_nn    - time of the nearest sampled step at the end crossing (s);
 ;                    equals t[i_end] (last sample inside the event window)
-;     .duration    - t_end - t_start using the interpolated crossing times (s)
+;     .duration    - t_end_interp - t_start_interp (s)
 ;     .tang_alt_min - minimum tangent altitude within the event window (km);
 ;                    near 0 for both event types (deepest atmospheric point)
-;     .t_min       - time of minimum tangent altitude (s)
-;     .lat_min     - tangent point latitude at minimum (deg)
-;     .lon_min     - tangent point longitude at minimum (deg)
+;     .lat_min     - tangent point latitude at minimum tangent altitude (deg)
+;     .lon_min     - tangent point longitude at minimum tangent altitude (deg)
+;     .tang_alt_max - maximum tangent altitude within the event window (km);
+;                    near altitude_max for both event types
+;     .lat_max     - tangent point latitude at maximum tangent altitude (deg)
+;     .lon_max     - tangent point longitude at maximum tangent altitude (deg)
 ;
 ; NOTES:
 ;   - Uses ROUTINE_FILEPATH for path setup (IDL 8.0+)
@@ -257,15 +260,17 @@ pro mars_occultation_survey, survey = survey, $
     ingress: 0b, $ ; 1 for ingress event, 0 for egress event
     i_start: 0l, $
     i_end: 0l, $
-    t_start: 0.0d, $    ; interpolated crossing time at event start
-    t_end: 0.0d, $      ; interpolated crossing time at event end
-    t_start_nn: 0.0d, $ ; nearest sample time at event start
-    t_end_nn: 0.0d, $   ; nearest sample time at event end
+    t_start_interp: 0.0d, $ ; interpolated crossing time at event start
+    t_end_interp: 0.0d, $   ; interpolated crossing time at event end
+    t_start_nn: 0.0d, $     ; nearest sample time at event start
+    t_end_nn: 0.0d, $       ; nearest sample time at event end
     duration: 0.0d, $
     tang_alt_min: 0.0d, $
-    t_min: 0.0d, $
     lat_min: 0.0d, $
-    lon_min: 0.0d $
+    lon_min: 0.0d, $
+    tang_alt_max: 0.0d, $
+    lat_max: 0.0d, $
+    lon_max: 0.0d $
     }
 
   n_ingress = 0l
@@ -301,19 +306,22 @@ pro mars_occultation_survey, survey = survey, $
           frac_e = (0.0d - tang_alt[j_ing_end]) / (tang_alt[j_ing_end+1] - tang_alt[j_ing_end])
           t_ing_end = t[j_ing_end] + frac_e * (t[j_ing_end+1] - t[j_ing_end])
           ta_min = min(tang_alt[ii : j_ing_end], i_min_rel)
+          ta_max = max(tang_alt[ii : j_ing_end], i_max_rel)
           event_buf[n_events].type    = 'ING'
           event_buf[n_events].ingress = 1b
           event_buf[n_events].i_start = ii
           event_buf[n_events].i_end = j_ing_end
-          event_buf[n_events].t_start    = t_ing_start
-          event_buf[n_events].t_end      = t_ing_end
-          event_buf[n_events].t_start_nn = t[ii]
-          event_buf[n_events].t_end_nn   = t[j_ing_end]
-          event_buf[n_events].duration   = t_ing_end - t_ing_start
+          event_buf[n_events].t_start_interp = t_ing_start
+          event_buf[n_events].t_end_interp   = t_ing_end
+          event_buf[n_events].t_start_nn     = t[ii]
+          event_buf[n_events].t_end_nn       = t[j_ing_end]
+          event_buf[n_events].duration       = t_ing_end - t_ing_start
           event_buf[n_events].tang_alt_min = ta_min
-          event_buf[n_events].t_min = t[ii + i_min_rel]
           event_buf[n_events].lat_min = tang_lat[ii + i_min_rel]
           event_buf[n_events].lon_min = tang_lon[ii + i_min_rel]
+          event_buf[n_events].tang_alt_max = ta_max
+          event_buf[n_events].lat_max = tang_lat[ii + i_max_rel]
+          event_buf[n_events].lon_max = tang_lon[ii + i_max_rel]
           n_events++
           n_ingress++
 
@@ -325,19 +333,22 @@ pro mars_occultation_survey, survey = survey, $
           frac_e = (altitude_max - tang_alt[ie]) / (tang_alt[ie+1] - tang_alt[ie])
           t_egr_end = t[ie] + frac_e * (t[ie+1] - t[ie])
           ta_min = min(tang_alt[j_egr_start : ie], i_min_rel)
+          ta_max = max(tang_alt[j_egr_start : ie], i_max_rel)
           event_buf[n_events].type    = 'EGR'
           event_buf[n_events].ingress = 0b
           event_buf[n_events].i_start = j_egr_start
           event_buf[n_events].i_end = ie
-          event_buf[n_events].t_start    = t_egr_start
-          event_buf[n_events].t_end      = t_egr_end
-          event_buf[n_events].t_start_nn = t[j_egr_start]
-          event_buf[n_events].t_end_nn   = t[ie]
-          event_buf[n_events].duration   = t_egr_end - t_egr_start
+          event_buf[n_events].t_start_interp = t_egr_start
+          event_buf[n_events].t_end_interp   = t_egr_end
+          event_buf[n_events].t_start_nn     = t[j_egr_start]
+          event_buf[n_events].t_end_nn       = t[ie]
+          event_buf[n_events].duration       = t_egr_end - t_egr_start
           event_buf[n_events].tang_alt_min = ta_min
-          event_buf[n_events].t_min = t[j_egr_start + i_min_rel]
           event_buf[n_events].lat_min = tang_lat[j_egr_start + i_min_rel]
           event_buf[n_events].lon_min = tang_lon[j_egr_start + i_min_rel]
+          event_buf[n_events].tang_alt_max = ta_max
+          event_buf[n_events].lat_max = tang_lat[j_egr_start + i_max_rel]
+          event_buf[n_events].lon_max = tang_lon[j_egr_start + i_max_rel]
           n_events++
           n_egress++
         endif
@@ -359,20 +370,21 @@ pro mars_occultation_survey, survey = survey, $
 
   if n_ingress + n_egress gt 0 then begin
     print, ''
-    print, format = '(A6,A5,A12,A12,A12,A12,A10,A12,A10,A10)', $
-      '#', 'Type', 't_start(s)', 't_start_nn', 't_end(s)', 't_end_nn', $
-      'dur(s)', 'alt_min(km)', 'lat(deg)', 'lon(deg)'
-    print, string(replicate(45b, 105))
+    print, format = '(A6,A5,A14,A12,A14,A12,A10,A10,A10,A10,A10)', $
+      '#', 'Type', 't_start_interp', 't_start_nn', 't_end_interp', 't_end_nn', $
+      'dur(s)', 'alt_min(km)', 'alt_max(km)', 'lat_min', 'lon_min'
+    print, string(replicate(45b, 117))
     for k = 0l, n_ingress + n_egress - 1l do begin
-      print, format = '(I6,A5,F12.1,F12.1,F12.1,F12.1,F10.1,F12.2,F10.2,F10.2)', $
+      print, format = '(I6,A5,F14.1,F12.1,F14.1,F12.1,F10.1,F10.2,F10.2,F10.2,F10.2)', $
         k + 1, $
         events[k].type, $
-        events[k].t_start, $
+        events[k].t_start_interp, $
         events[k].t_start_nn, $
-        events[k].t_end, $
+        events[k].t_end_interp, $
         events[k].t_end_nn, $
         events[k].duration, $
         events[k].tang_alt_min, $
+        events[k].tang_alt_max, $
         events[k].lat_min, $
         events[k].lon_min
     endfor
