@@ -370,12 +370,12 @@ pro mars_occultation_survey, survey = survey, $
 
   if n_ingress + n_egress gt 0 then begin
     print, ''
-    print, format = '(A6,A5,A14,A12,A14,A12,A14,A10,A10,A10,A10)', $
+    print, format = '(A6,A5,A14,A12,A14,A12,A14,A12,A12,A10,A10)', $
       '#', 'Type', 't_start_interp', 't_start', 't_end_interp', 't_end', $
       'dur_interp(s)', 'alt_min(km)', 'alt_max(km)', 'lat_min', 'lon_min'
     print, string(replicate(45b, 121))
     for k = 0l, n_ingress + n_egress - 1l do begin
-      print, format = '(I6,A5,F14.1,F12.1,F14.1,F12.1,F14.1,F10.2,F10.2,F10.2,F10.2)', $
+      print, format = '(I6,A5,F14.1,F12.1,F14.1,F12.1,F14.1,F12.2,F12.2,F10.2,F10.2)', $
         k + 1, $
         events[k].type, $
         events[k].t_start_interp, $
