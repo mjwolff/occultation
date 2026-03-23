@@ -66,6 +66,8 @@
 ;   Each event struct contains:
 ;     .type        - 'ING' (tangent alt decreasing, altitude_max -> 0)
 ;                    or 'EGR' (tangent alt increasing, 0 -> altitude_max)
+;     .ingress     - byte flag: 1 for ingress event, 0 for egress event.
+;                    Allows array filtering: idx = where(events.ingress)
 ;     .i_start     - index of first sample inside the event window:
 ;                    ING: first sample with tang_alt < altitude_max
 ;                    EGR: first sample with tang_alt >= 0
@@ -252,6 +254,7 @@ pro mars_occultation_survey, survey = survey, $
   ; --- Step 2: split spans into ING/EGR half-events ---
   event_template = { $
     type: 'ING', $ ; 'ING' (descending) or 'EGR' (ascending)
+    ingress: 0b, $ ; 1 for ingress event, 0 for egress event
     i_start: 0l, $
     i_end: 0l, $
     t_start: 0.0d, $    ; interpolated crossing time at event start
@@ -298,7 +301,8 @@ pro mars_occultation_survey, survey = survey, $
           frac_e = (0.0d - tang_alt[j_ing_end]) / (tang_alt[j_ing_end+1] - tang_alt[j_ing_end])
           t_ing_end = t[j_ing_end] + frac_e * (t[j_ing_end+1] - t[j_ing_end])
           ta_min = min(tang_alt[ii : j_ing_end], i_min_rel)
-          event_buf[n_events].type = 'ING'
+          event_buf[n_events].type    = 'ING'
+          event_buf[n_events].ingress = 1b
           event_buf[n_events].i_start = ii
           event_buf[n_events].i_end = j_ing_end
           event_buf[n_events].t_start    = t_ing_start
@@ -321,7 +325,8 @@ pro mars_occultation_survey, survey = survey, $
           frac_e = (altitude_max - tang_alt[ie]) / (tang_alt[ie+1] - tang_alt[ie])
           t_egr_end = t[ie] + frac_e * (t[ie+1] - t[ie])
           ta_min = min(tang_alt[j_egr_start : ie], i_min_rel)
-          event_buf[n_events].type = 'EGR'
+          event_buf[n_events].type    = 'EGR'
+          event_buf[n_events].ingress = 0b
           event_buf[n_events].i_start = j_egr_start
           event_buf[n_events].i_end = ie
           event_buf[n_events].t_start    = t_egr_start
