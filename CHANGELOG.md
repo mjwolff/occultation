@@ -345,3 +345,10 @@ Add ingress byte flag to survey event struct
 
 Files changed:
   - examples/mars_occultation_survey.pro
+
+### db65476 — 2026-03-23 16:40:42 +0100
+Restructure survey event struct: rename t_start/t_end, add tang_alt_max, remove t_min
+
+Files changed:
+  - CHANGELOG.md
+  - examples/mars_occultation_survey.pro
