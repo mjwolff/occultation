@@ -38,4 +38,13 @@ pro mars_occultation_event_example
   print, '================================================='
   print, ''
 
+  ; Plot transmittance vs tangent altitude
+  plot, result.transmittance, result.tang_alt, $
+    xrange = [0, 1], xstyle = 1, $
+    yrange = [0, 110], ystyle = 1, $
+    xtitle = 'Transmittance', $
+    ytitle = 'Tangent Altitude (km)', $
+    title = 'Event ' + strtrim(0, 2) + ' (' + result.event.type + '): Transmittance vs Altitude', $
+    psym = -1, symsize = 0.8
+
 end
