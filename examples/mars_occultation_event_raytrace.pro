@@ -4,7 +4,7 @@
 ;
 ; PURPOSE:
 ;   Ray-trace each spacecraft position within a single occultation event
-;   from a survey structure. Computes tangent altitude, layer intersections,
+;   from a SURVEY structure. Computes tangent altitude, layer intersections,
 ;   transmittance, and pathlength for every time step in the event window.
 ;   No orbit propagation is required; all position and solar geometry are
 ;   drawn directly from the survey struct.
@@ -68,12 +68,12 @@ pro mars_occultation_event_raytrace, survey, event_index, result, verbose = verb
   i1 = ev.i_end
   npts = i1 - i0 + 1
 
-  time    = survey.time[i0:i1]
-  sat_lat = survey.sat_lat[i0:i1]
-  sat_lon = survey.sat_lon[i0:i1]
-  sat_alt = survey.sat_alt[i0:i1]
-  ss_lon  = survey.ss_lon[i0:i1]
-  ss_lat  = survey.ss_lat            ; scalar
+  time = survey.time[i0 : i1]
+  sat_lat = survey.sat_lat[i0 : i1]
+  sat_lon = survey.sat_lon[i0 : i1]
+  sat_alt = survey.sat_alt[i0 : i1]
+  ss_lon = survey.ss_lon[i0 : i1]
+  ss_lat = survey.ss_lat ; scalar
 
   print, ''
   print, '================================================='
@@ -87,12 +87,12 @@ pro mars_occultation_event_raytrace, survey, event_index, result, verbose = verb
   ; ===========================================================================
   ; 2. ALLOCATE OUTPUT ARRAYS
   ; ===========================================================================
-  tang_alt      = dblarr(npts)
-  tang_lat      = dblarr(npts)
-  tang_lon      = dblarr(npts)
-  n_int_arr     = lonarr(npts)
+  tang_alt = dblarr(npts)
+  tang_lat = dblarr(npts)
+  tang_lon = dblarr(npts)
+  n_int_arr = lonarr(npts)
   transmittance = dblarr(npts)
-  path_info     = ptrarr(npts, /allocate_heap)
+  path_info = ptrarr(npts, /allocate_heap)
 
   ; ===========================================================================
   ; 3. RAY TRACE LOOP
@@ -104,7 +104,7 @@ pro mars_occultation_event_raytrace, survey, event_index, result, verbose = verb
     osse_trace_ray_occultation_3d, sat_pos, sun_dir, ta, intersections, n_int, $
       params = params
 
-    tang_alt[i]  = ta
+    tang_alt[i] = ta
     n_int_arr[i] = n_int
 
     ; Tangent point coordinates
@@ -128,42 +128,42 @@ pro mars_occultation_event_raytrace, survey, event_index, result, verbose = verb
         pts[*, j] = [res.longitude, res.latitude, res.altitude]
       endfor
       *path_info[i] = { $
-        path_length:    s_points, $
+        path_length: s_points, $
         path_longitude: reform(pts[0, *]), $
-        path_latitude:  reform(pts[1, *]), $
-        path_altitude:  reform(pts[2, *]) }
+        path_latitude: reform(pts[1, *]), $
+        path_altitude: reform(pts[2, *])}
     endif
 
     if keyword_set(verbose) then $
       print, format = '(I6,A,F10.1,A,F8.2,A,I4,A,F8.5)', $
-        i, '  t=', time[i], '  tang_alt=', ta, ' km  n_int=', n_int, $
-        '  T=', transmittance[i]
+      i, '  t=', time[i], '  tang_alt=', ta, ' km  n_int=', n_int, $
+      '  T=', transmittance[i]
   endfor
 
   ; ===========================================================================
   ; 4. PRINT SUMMARY TABLE
   ; ===========================================================================
-  print, format = '(A6,A12,A10,A6,A12)', '#', 't(s)', 'tang_alt', 'n_int', 'transmittance'
-  print, string(replicate(45b, 46))
+  print, format = '(A6,A12,A10,A6,A14)', '#', 't(s)', 'tang_alt', 'n_int', 'transmittance'
+  print, string(replicate(45b, 48))
   for i = 0l, npts - 1l do $
-    print, format = '(I6,F12.1,F10.2,I6,F12.5)', $
-      i, time[i], tang_alt[i], n_int_arr[i], transmittance[i]
+    print, format = '(I6,F12.1,F10.2,I6,F14.5)', $
+    i, time[i], tang_alt[i], n_int_arr[i], transmittance[i]
   print, ''
 
   ; ===========================================================================
   ; 5. RETURN RESULT
   ; ===========================================================================
   result = { $
-    time:          time, $
-    sat_lat:       sat_lat, $
-    sat_lon:       sat_lon, $
-    sat_alt:       sat_alt, $
-    tang_alt:      tang_alt, $
-    tang_lat:      tang_lat, $
-    tang_lon:      tang_lon, $
-    n_int:         n_int_arr, $
+    time: time, $
+    sat_lat: sat_lat, $
+    sat_lon: sat_lon, $
+    sat_alt: sat_alt, $
+    tang_alt: tang_alt, $
+    tang_lat: tang_lat, $
+    tang_lon: tang_lon, $
+    n_int: n_int_arr, $
     transmittance: transmittance, $
-    path_info:     path_info, $
-    event:         ev $
+    path_info: path_info, $
+    event: ev $
     }
 end
