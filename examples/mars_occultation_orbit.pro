@@ -48,7 +48,7 @@
 ;   2026-03-23: remove QUIET (no longer being used)
 ;-
 
-pro mars_occultation_orbit, verbose = verbose
+pro mars_occultation_orbit, a = a, verbose = verbose
   compile_opt idl2
 
   ; ===========================================================================

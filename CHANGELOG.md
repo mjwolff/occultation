@@ -352,3 +352,48 @@ Restructure survey event struct: rename t_start/t_end, add tang_alt_max, remove 
 Files changed:
   - CHANGELOG.md
   - examples/mars_occultation_survey.pro
+
+### 82ea4ad — 2026-03-23 16:44:12 +0100
+Rename t_start_nn/t_end_nn -> t_start/t_end; duration -> duration_interp
+
+Files changed:
+  - CHANGELOG.md
+  - examples/mars_occultation_survey.pro
+
+### c686aee — 2026-03-23 16:46:28 +0100
+Fix column header alignment in survey events print table
+
+Files changed:
+  - examples/mars_occultation_survey.pro
+
+### 9a6847b — 2026-03-23 17:05:25 +0100
+Add ss_lat and ss_lon to survey event struct
+
+Files changed:
+  - examples/mars_occultation_survey.pro
+
+### cace9a4 — 2026-03-23 17:16:27 +0100
+Move ss_lat/ss_lon from event struct to survey struct
+
+Files changed:
+  - examples/mars_occultation_survey.pro
+
+### 3568e3c — 2026-03-23 17:19:17 +0100
+Add sat_lat/sat_lon/sat_alt to survey struct; add mars_occultation_event_raytrace
+
+Files changed:
+  - examples/mars_occultation_event_raytrace.pro
+  - examples/mars_occultation_survey.pro
+
+### f82a690 — 2026-03-24 10:49:32 +0100
+Add mars_occultation_event_example; fix raytrace print table alignment
+
+Files changed:
+  - examples/mars_occultation_event_example.pro
+  - examples/mars_occultation_event_raytrace.pro
+
+### 2bb067d — 2026-03-24 10:50:44 +0100
+Add transmittance vs altitude plot to mars_occultation_event_example
+
+Files changed:
+  - examples/mars_occultation_event_example.pro
